@@ -17,6 +17,18 @@ const numberOrNull = (value: unknown): number | null => {
   return Number.isFinite(number) ? number : null;
 };
 
+function safePreStocksUrl(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && ["prestocks.com", "www.prestocks.com"].includes(url.hostname.toLowerCase())
+      ? url.toString()
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function parsePreStocks(input: unknown): PreStock[] {
   if (!Array.isArray(input)) return [];
 
@@ -33,7 +45,7 @@ export function parsePreStocks(input: unknown): PreStock[] {
       symbol,
       description: typeof row.description === "string" ? row.description : "",
       image: typeof row.image === "string" ? row.image : undefined,
-      externalUrl: typeof row.external_url === "string" ? row.external_url : undefined,
+      externalUrl: safePreStocksUrl(row.external_url),
       mint,
       markPrice: numberOrNull(row.markPrice),
       tokenPrice: numberOrNull(row.tokenPrice),
