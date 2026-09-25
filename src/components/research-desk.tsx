@@ -6,9 +6,11 @@ import {
   ArrowUpRight,
   Bookmark,
   ChevronDown,
+  Download,
   ExternalLink,
   FileSearch,
   GitCompareArrows,
+  Headphones,
   Handshake,
   LoaderCircle,
   Newspaper,
@@ -133,10 +135,58 @@ function SeatView({ title, kind, seat, articles }: { title: string; kind: "bull"
   );
 }
 
-function EditorSynthesis({ seat, articles }: { seat: Seat; articles: Article[] }) {
+function CouncilPodcast({ seat, company }: { seat: Seat; company: string }) {
+  const [loading, setLoading] = useState(false);
+  const [audioUrl, setAudioUrl] = useState("");
+  const [error, setError] = useState("");
+  useEffect(() => () => { if (audioUrl) URL.revokeObjectURL(audioUrl); }, [audioUrl]);
+
+  const turns = [
+    { speaker: "host", text: `Welcome to the Vestra research brief. Today we're looking at ${company}.` },
+    { speaker: "analyst", text: `Here is the Council's read: ${seat.thesis}` },
+    ...(seat.agreements[0] ? [{ speaker: "host", text: `The strongest point of agreement is this: ${seat.agreements[0].text}` }] : []),
+    ...(seat.disagreements[0] ? [{ speaker: "analyst", text: `The key difference in interpretation is this: ${seat.disagreements[0].text}` }] : []),
+    ...(seat.uncertainties[0] ? [{ speaker: "host", text: `What remains unknown: ${seat.uncertainties[0]}` }] : []),
+    ...(seat.falsifiers[0] ? [{ speaker: "analyst", text: `Evidence that could change the Council's view: ${seat.falsifiers[0]}` }] : []),
+    { speaker: "host", text: "That was the Vestra research brief. It summarizes available information and is not investment advice." },
+  ];
+
+  async function createAudio() {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/podcast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company, turns }),
+      });
+      if (!response.ok) {
+        const result = await response.json() as { error?: string };
+        throw new Error(result.error || "Could not create the audio brief.");
+      }
+      setAudioUrl(URL.createObjectURL(await response.blob()));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not create the audio brief.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return <div className="council-podcast">
+    <div className="council-podcast-copy"><span className="podcast-icon"><Headphones size={17} aria-hidden="true" /></span><div><strong>Listen to the Council</strong><span>A short, two voice audio brief based on this readout.</span></div></div>
+    {!audioUrl ? <button className="podcast-button" type="button" onClick={createAudio} disabled={loading}>
+      {loading ? <LoaderCircle size={15} className="spin" aria-hidden="true" /> : <Headphones size={15} aria-hidden="true" />}{loading ? "Making brief…" : "Create audio brief"}
+    </button> : <div className="podcast-player"><audio controls preload="metadata" src={audioUrl}>Audio playback is not supported by this browser.</audio><a className="podcast-download" href={audioUrl} download={`vestra-${company.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-brief.wav`} aria-label="Download audio brief"><Download size={15} aria-hidden="true" /></a><button className="podcast-regenerate" type="button" onClick={createAudio} disabled={loading}>{loading ? "Making…" : "Regenerate"}</button></div>}
+    {error && <p className="podcast-error" role="alert">{error}</p>}
+    <span className="podcast-note">Generated only when requested · Gemini 3.8 Flash-Lite TTS</span>
+  </div>;
+}
+
+function EditorSynthesis({ seat, articles, company }: { seat: Seat; articles: Article[]; company: string }) {
   return <section className="editor-synthesis" aria-label="Council research synthesis">
     <div className="editor-heading"><span className="editor-icon"><Scale size={18} aria-hidden="true" /></span><div><span className="eyebrow">COUNCIL READOUT</span><strong>What the evidence supports — and what remains uncertain</strong></div><ConfidenceSignal value={seat.confidence} /></div>
     <p className="editor-thesis">{seat.thesis}</p>
+    <CouncilPodcast seat={seat} company={company} />
     <div className="editor-comparison">
       <div className="editor-point editor-agreement"><span className="editor-point-title"><Handshake size={15} aria-hidden="true" />AGREEMENT</span>{seat.agreements.length ? <ul>{seat.agreements.map((item, index) => <li key={index}><span>{item.text}</span><CitationLinks ids={item.evidenceIds} articles={articles} /></li>)}</ul> : <p>No clear agreement in these headlines.</p>}</div>
       <div className="editor-point editor-disagreement"><span className="editor-point-title"><GitCompareArrows size={15} aria-hidden="true" />DISAGREEMENT</span>{seat.disagreements.length ? <ul>{seat.disagreements.map((item, index) => <li key={index}><span>{item.text}</span><CitationLinks ids={item.evidenceIds} articles={articles} /></li>)}</ul> : <p>No clear disagreement in these headlines.</p>}</div>
@@ -425,7 +475,7 @@ export function ResearchDesk({ assets, fetchedAt, error, initialView, initialSym
               <div className="debate-heading"><div><span className="eyebrow">THREE VIEWS · ONE READOUT</span><h3>The debate room</h3><p>Bull, Bear and Neutral review the same headlines. The Council weighs their cases.</p></div><button className="primary-button" type="button" onClick={() => void runDebate()} disabled={debateLoading || newsState !== "ready" || articles.length === 0}>{debateLoading ? <><LoaderCircle className="spin" size={16} aria-hidden="true" />Debate in progress…</> : <><GitCompareArrows size={16} aria-hidden="true" />Start debate</>}</button></div>
               <DebateFlow nodes={debateNodes} />
               {debateError && <div className="inline-alert debate-error" role="alert"><span>{debateError}</span><button type="button" onClick={() => void runDebate()} disabled={debateLoading}>Try again</button></div>}
-              {debate ? <div className="debate-results"><SharedEvidence articles={debateEvidence} /><div className="debate-faceoff"><div>{debate.bull ? <SeatView title="Bull analyst" kind="bull" seat={debate.bull} articles={debateEvidence} /> : <div className="seat-pending">Bull analyst is weighing the upside…</div>}{debate.neutral && <article className="neutral-card"><span className="eyebrow">NEUTRAL VIEW</span><p>{debate.neutral.thesis}</p><ConfidenceSignal value={debate.neutral.confidence} /></article>}</div><div className="debate-versus" aria-hidden="true"><span>VS</span></div><div>{debate.bear ? <SeatView title="Bear analyst" kind="bear" seat={debate.bear} articles={debateEvidence} /> : <div className="seat-pending">Bear analyst is weighing the risks…</div>}</div></div>{debate.council ? <EditorSynthesis seat={debate.council} articles={debateEvidence} /> : <div className="seat-pending council-pending">The Council is comparing all three views…</div>}<div className="debate-disclosure">Bull: {debate.models.bull ?? "pending"} · Bear: {debate.models.bear ?? "pending"} · Neutral: {debate.models.neutral ?? "pending"} · Council: {debate.models.council ?? "pending"}{debate.generatedAt ? ` · ${timeLabel(debate.generatedAt)}` : ""}. Company-specific headlines and market snapshot only; not a buy/sell call.</div></div> : <div className="debate-preview" aria-live="polite">
+              {debate ? <div className="debate-results"><SharedEvidence articles={debateEvidence} /><div className="debate-faceoff"><div>{debate.bull ? <SeatView title="Bull analyst" kind="bull" seat={debate.bull} articles={debateEvidence} /> : <div className="seat-pending">Bull analyst is weighing the upside…</div>}{debate.neutral && <article className="neutral-card"><span className="eyebrow">NEUTRAL VIEW</span><p>{debate.neutral.thesis}</p><ConfidenceSignal value={debate.neutral.confidence} /></article>}</div><div className="debate-versus" aria-hidden="true"><span>VS</span></div><div>{debate.bear ? <SeatView title="Bear analyst" kind="bear" seat={debate.bear} articles={debateEvidence} /> : <div className="seat-pending">Bear analyst is weighing the risks…</div>}</div></div>{debate.council ? <EditorSynthesis seat={debate.council} articles={debateEvidence} company={asset.name.replace(/\s+PreStocks$/i, "")} /> : <div className="seat-pending council-pending">The Council is comparing all three views…</div>}<div className="debate-disclosure">Bull: {debate.models.bull ?? "pending"} · Bear: {debate.models.bear ?? "pending"} · Neutral: {debate.models.neutral ?? "pending"} · Council: {debate.models.council ?? "pending"}{debate.generatedAt ? ` · ${timeLabel(debate.generatedAt)}` : ""}. Company-specific headlines and market snapshot only; not a buy/sell call.</div></div> : <div className="debate-preview" aria-live="polite">
                 <div className="preview-sides"><div className="preview-side preview-bull"><span className="preview-icon"><TrendingUp size={18} aria-hidden="true" /></span><div><span className="eyebrow">BULL ANALYST</span><strong>Show the upside case</strong></div><span className="preview-wait">{newsState === "ready" ? "Ready" : "Waiting for headlines"}</span></div><div className="preview-divider"><span>AGAINST</span></div><div className="preview-side preview-bear"><span className="preview-icon"><ShieldAlert size={18} aria-hidden="true" /></span><div><span className="eyebrow">BEAR ANALYST</span><strong>Show risks in the same headlines</strong></div><span className="preview-wait">{newsState === "ready" ? "Ready" : "Waiting for headlines"}</span></div></div>
                 <div className="preview-editor"><span className="editor-icon"><Scale size={17} aria-hidden="true" /></span><div><strong>Council readout</strong><span>Compares the three views, evidence, and what could change the read.</span></div><span className="model-note">Four AI roles</span></div>
               </div>}
