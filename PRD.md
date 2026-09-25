@@ -90,15 +90,13 @@ Stocklana judging also looks for a real user/problem, a working end-to-end demo,
 - Add reasonable request size and response size limits; avoid sending private keys or wallet secrets to the model.
 - Do not persist Gemini keys, complete prompts, or user secrets in browser storage or logs.
 
-### 7.4 Historical context / backtesting
+### 7.4 Historical market context and shareable research
 
-- GeckoTerminal's public API exposes exact-mint Solana pool discovery and OHLCV endpoints. Vestra discovers USDC pools for the selected mint at runtime, selects a pool with liquidity and recent volume, and displays daily USD candles with pool/source attribution. Its public API is beta, cached, and rate-limited.
-- In the September 24, 2026 snapshot, the latest close from the selected pool was about five times the PreStocks catalogue quote. This may reflect a unit, supply, or market-data inconsistency; the cause is not confirmed. Treat this as a live observation, not a stable conversion factor.
-- Investigate and reconcile actual on-chain swap/trade history for the selected PreStocks mint against PreStocks' catalogue price before enabling strategy results. Keep the separate pool chart explicitly labeled while that check is pending.
-- Validate token decimals, quote asset, timestamps, missing intervals, liquidity, and history depth before treating chart history as comparable to the PreStocks quote.
-- Only label a result “backtest” when it uses a documented, reproducible rule over verified historical observations and states date range, sample size, fees/slippage, and benchmark.
-- Do not use Dukascopy FX or another unrelated asset series as a proxy.
-- Keep DEX-pool USD history separate from the PreStocks quote. Show a warning when the latest candle materially differs from the catalogue quote. A clearly labeled pool-only historical simulation may be shown over the same exact-mint candles, but never imply its returns represent PreStocks catalogue prices or executable returns. State the interval, date window, sample size, benchmark, execution timing, cost assumption, omitted costs, and low-liquidity limitation.
+- GeckoTerminal pool discovery and OHLCV are secondary context for the exact selected PreStocks mint. Keep pool liquidity, volume, and closes visibly separate from catalogue quote and reference mark; pool data is not a PreStocks return series.
+- The Market replay view supports stepping through available daily closes and comparing a dated company headline with nearby completed closes. Exclude the headline-day close where its timestamp could be later than publication. Label this a timing comparison; it does not establish causation.
+- Do not offer a trading strategy simulation or backtest on pool prices. This cannot answer how a PreStocks position would have performed and risks presenting unrelated market data as performance evidence.
+- Export the Council result as a dated Markdown brief containing the readout, confidence, cited evidence, agreement/disagreement, unknowns, falsifiers, and the PreStocks quote/mark snapshot. Preserve source URLs so the brief can be checked and shared outside the session.
+- Do not use Dukascopy FX or another unrelated asset series as a proxy for PreStocks history.
 
 ### 7.5 Responsive interface and accessibility
 
@@ -140,7 +138,7 @@ Create an original Vestra identity using familiar patterns from successful crypt
 - A user can load real company news, run the Bull/Bear/Neutral/Council flow when a Gemini key is configured, and follow citations to source cards and originals.
 - A user can see general crypto market headlines in a separately attributed context feed; those stories never enter the company debate packet.
 - All data is visibly sourced and timestamped; errors and missing history are honest and recoverable.
-- At least one selected PreStocks mint has verified usable history before a backtest is shown.
+- The selected PreStocks mint’s pool chart remains labeled as separate market context; it is not used to calculate simulated returns.
 - App works in desktop and mobile layouts and can be demoed from a fresh session.
 - A README, checklist, screenshot/video path, and submission copy are ready before the deadline.
 

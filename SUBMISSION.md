@@ -14,7 +14,7 @@ Vestra brings that work into one research desk for companies in the PreStocks ca
 
 Three Gemini analysts read the same server-fetched source packet in parallel: a bull makes the upside case, a bear tests the risks, and a neutral analyst separates direct statements from unknowns. A Council chair reviews their arguments against the headlines and summarizes the evidence and uncertainties. Supported claims link to the publisher. A live node graph shows each stage as it finishes, and an optional two-voice audio brief reads the Council’s existing summary.
 
-Market replay follows the selected PreStocks mint to a Solana USDC pool. Users can inspect daily prices in LuxAlgo Vela, compare closes around a dated headline, and explore a sample 5/20-day moving-average strategy with adjustable costs beside buy-and-hold.
+Market replay follows the selected PreStocks mint to a Solana USDC pool. Users can inspect daily prices in LuxAlgo Vela, step through historical closes, and compare closes around a dated company headline. This is context only: it does not claim the pool price represents PreStocks returns or that a headline caused a move. After a debate, users can download a dated Markdown brief with the Council read, source links, uncertainties, and the PreStocks quote/mark snapshot.
 
 Saved companies also receive an in-app check every ten minutes while Vestra is open. It shows the PreStocks quote change since the prior browser-local check and flags quote gaps, low pool activity, or stale closes for follow-up. It does not send background or Telegram alerts.
 
@@ -50,7 +50,7 @@ The official submit page currently requires sign-in and a connected wallet befor
 - **0:20–0:45:** Vestra opens on Anthropic PreStocks. Point out the token quote and reference mark, the latest pool close, volume, and the market-read flags. The readings change; a clean check does not prove fair value.
 - **0:45–1:25:** Choose a company-linked headline. Start the debate and show Bull, Bear, and Neutral working in parallel before Council weighs their cases. Follow a citation to the publisher. If Gemini is busy, continue to Market replay without claiming a completed readout.
 - **1:25–2:00:** Open Market replay. Show that the chart uses the same company token selected in Research. Point to the Vela chart, liquidity, and volume. Select a dated headline and inspect nearby prices.
-- **2:00–2:30:** Expand the strategy simulation. Explain that it compares average pool prices over 5 and 20 days, acts at the next available daily open, and includes adjustable costs and drawdown. These are discovered-pool results, not PreStocks returns.
+- **2:00–2:30:** Save the cited brief. Show that it preserves the dated Council read, linked sources, unknowns, and quote/mark snapshot for sharing or later review.
 - **2:30–2:50:** Play the Council audio brief, or show the SpaceX lifecycle notice. Close: “Vestra helps me see the company story, what each side thinks, and where the evidence is still thin.”
 
 ## Disclosures

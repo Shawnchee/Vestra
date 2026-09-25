@@ -197,9 +197,64 @@ function CouncilPodcast({ seat, company }: { seat: Seat; company: string }) {
   </div>;
 }
 
-function EditorSynthesis({ seat, articles, company }: { seat: Seat; articles: Article[]; company: string }) {
+function EditorSynthesis({ seat, articles, company, generatedAt, tokenPrice, markPrice, fetchedAt }: { seat: Seat; articles: Article[]; company: string; generatedAt?: string; tokenPrice: number | null; markPrice: number | null; fetchedAt: string }) {
+  function saveBrief() {
+    const referencedIds = new Set([
+      ...seat.claims.flatMap((claim) => claim.evidenceIds),
+      ...seat.agreements.flatMap((point) => point.evidenceIds),
+      ...seat.disagreements.flatMap((point) => point.evidenceIds),
+    ]);
+    const sources = articles.filter((article) => referencedIds.has(article.id));
+    const list = (items: string[]) => items.length ? items.map((item) => `- ${item}`).join("\n") : "- None identified in this review.";
+    const claimLines = seat.claims.map((claim) => {
+      const refs = claim.evidenceIds.map((id) => articles.find((article) => article.id === id)).filter((article): article is Article => Boolean(article));
+      return `- ${claim.text}${refs.length ? `\n  Sources: ${refs.map((article) => `[${article.publisher}](${article.url})`).join(", ")}` : "\n  Sources: no headline linked."}`;
+    });
+    const sourceLines = sources.map((article) => `- [${article.title}](${article.url}) — ${article.publisher}${article.publishedAt ? ` · ${article.publishedAt}` : ""}`);
+    const generatedLabel = generatedAt ? new Date(generatedAt).toISOString() : new Date().toISOString();
+    const snapshotLabel = new Date(fetchedAt).toISOString();
+    const report = [
+      `# ${company} — Vestra research brief`,
+      ``,
+      `Generated: ${generatedLabel}`,
+      ``,
+      `## PreStocks snapshot`,
+      `- Token quote: ${tokenPrice === null ? "Unavailable" : money(tokenPrice, 6)}`,
+      `- Reference mark: ${markPrice === null ? "Unavailable" : money(markPrice, 6)}`,
+      `- Catalogue fetched: ${snapshotLabel}`,
+      ``,
+      `## Council read`,
+      seat.thesis,
+      ``,
+      `Confidence: ${seat.confidence}`,
+      ``,
+      `## Main points`,
+      claimLines.length ? claimLines.join("\n") : "- No claims provided.",
+      ``,
+      `## Agreement`, list(seat.agreements.map((point) => point.text)),
+      ``,
+      `## Disagreement`, list(seat.disagreements.map((point) => point.text)),
+      ``,
+      `## Still unknown`, list(seat.uncertainties),
+      ``,
+      `## What could change the view`, list(seat.falsifiers),
+      ``,
+      `## Sources`, sourceLines.length ? sourceLines.join("\n") : "- No linked sources in this readout.",
+      ``,
+      `---`,
+      `Vestra research summary. PreStocks tokens represent economic exposure, not company shares. This is not investment advice.`,
+    ].join("\n");
+    const blob = new Blob([report], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `vestra-${company.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-brief.md`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   return <section className="editor-synthesis" aria-label="Council research synthesis">
-    <div className="editor-heading"><span className="editor-icon"><Scale size={18} aria-hidden="true" /></span><div><span className="eyebrow">COUNCIL READOUT</span><strong>What the evidence supports — and what remains uncertain</strong></div><ConfidenceSignal value={seat.confidence} /></div>
+    <div className="editor-heading"><span className="editor-icon"><Scale size={18} aria-hidden="true" /></span><div><span className="eyebrow">COUNCIL READOUT</span><strong>What the evidence supports — and what remains uncertain</strong></div><ConfidenceSignal value={seat.confidence} /><button className="brief-download" type="button" onClick={saveBrief}><Download size={14} aria-hidden="true" />Save cited brief</button></div>
     <p className="editor-thesis">{seat.thesis}</p>
     <CouncilPodcast seat={seat} company={company} />
     <div className="editor-comparison">
@@ -494,7 +549,7 @@ export function ResearchDesk({ assets, fetchedAt, error, initialView, initialSym
                 <SeatSlot seat={debate?.bull} loading={debateLoading} title="Bull" kind="bull" articles={debateEvidence} />
                 <SeatSlot seat={debate?.bear} loading={debateLoading} title="Bear" kind="bear" articles={debateEvidence} />
                 <SeatSlot seat={debate?.neutral} loading={debateLoading} title="Neutral" kind="neutral" articles={debateEvidence} />
-              </div>{debate?.council ? <EditorSynthesis seat={debate.council} articles={debateEvidence} company={asset.name.replace(/\s+PreStocks$/i, "")} /> : debateLoading ? <SeatSkeleton title="Council review" kind="council" /> : null}</div> : <div className="debate-preview" aria-live="polite">
+              </div>{debate?.council ? <EditorSynthesis seat={debate.council} articles={debateEvidence} company={asset.name.replace(/\s+PreStocks$/i, "")} generatedAt={debate.generatedAt} tokenPrice={asset.tokenPrice} markPrice={asset.markPrice} fetchedAt={fetchedAt} /> : debateLoading ? <SeatSkeleton title="Council review" kind="council" /> : null}</div> : <div className="debate-preview" aria-live="polite">
                 <div className="preview-sides"><div className="preview-side preview-bull"><span className="preview-icon"><TrendingUp size={18} aria-hidden="true" /></span><div><span className="eyebrow">BULL</span><strong>Upside case</strong></div><span className="preview-wait">{newsState === "ready" ? "Ready" : "Waiting for headlines"}</span></div><div className="preview-divider"><span>VS</span></div><div className="preview-side preview-bear"><span className="preview-icon"><ShieldAlert size={18} aria-hidden="true" /></span><div><span className="eyebrow">BEAR</span><strong>Risk case</strong></div><span className="preview-wait">{newsState === "ready" ? "Ready" : "Waiting for headlines"}</span></div></div>
                 <div className="preview-editor"><span className="editor-icon"><Scale size={17} aria-hidden="true" /></span><div><strong>Council readout</strong><span>Evidence, agreement, unknowns.</span></div></div>
               </div>}

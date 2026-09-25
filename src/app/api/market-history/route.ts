@@ -78,7 +78,7 @@ export async function GET(request: Request) {
       return [{ time, open, high, low, close, volume }];
     }).sort((a, b) => a.time - b.time) : [];
     // Exclude the current UTC day: its OHLCV candle may still be forming and is
-    // not a completed daily close for the chart, headline replay, or backtest.
+    // not a completed daily close for the chart or headline replay.
     const now = new Date();
     const currentUtcDayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 1000;
     const completedCandles = parsedCandles.filter((candle) => candle.time < currentUtcDayStart);
