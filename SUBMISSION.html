@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Vestra · Stocklana submission</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0c0f0e;--panel:#141a16;--line:#2a342e;--ink:#edf2ee;--muted:#a1aca4;--mint:#bdf23c;--warn:#e9bf72}
+    *{box-sizing:border-box}body{margin:0;background-color:var(--bg);background-image:linear-gradient(180deg,rgba(12,15,14,.48),rgba(12,15,14,.86) 760px),url("./public/images/vestra-market-atmosphere-v4.webp");background-position:center top,right top;background-size:cover,min(100vw,1800px) auto;background-repeat:no-repeat;background-attachment:scroll,fixed;color:var(--ink);font:15px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    main{width:min(920px,100%);margin:0 auto;padding:44px 24px 70px}.top{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+    .mark{display:block;width:36px;height:36px;object-fit:contain}
+    .brand{font-size:18px;font-weight:650;letter-spacing:-.04em}.eyebrow{margin:0 0 9px;color:#9ab2a0;font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+    h1{margin:0;font-size:clamp(34px,7vw,54px);font-weight:560;letter-spacing:-.055em;line-height:1.05}
+    .tagline{max-width:700px;margin:15px 0 28px;color:#c5d0c8;font-size:19px;line-height:1.45}
+    .meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 34px}.pill{padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:#c8d5cc;font-size:12px}.pill.primary{border-color:#385341;color:var(--mint);background:#152019}
+    section{margin-top:22px;padding:22px 23px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+    h2{margin:0 0 14px;font-size:17px;font-weight:570;letter-spacing:-.02em}p{margin:0 0 12px;color:#c2cdc5}p:last-child{margin-bottom:0}
+    .copy{position:relative}.copy button{float:right;margin-top:-7px;padding:7px 10px;border:1px solid #415046;border-radius:6px;background:#1a231d;color:var(--ink);font:inherit;font-size:12px;cursor:pointer}
+    .tracks{display:flex;flex-wrap:wrap;gap:9px}.track{padding:9px 12px;border-left:2px solid var(--mint);background:#111713;color:#dbe5dd}
+    .links{display:grid;gap:10px}.linkrow{display:grid;grid-template-columns:155px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid #26302a}.linkrow:last-child{border:0}.linkrow strong{font-weight:550}.placeholder{color:var(--warn)}
+    .script{display:grid;gap:13px}.beat{display:grid;grid-template-columns:80px 1fr;gap:12px;padding-bottom:12px;border-bottom:1px solid #26302a}.beat:last-child{border:0;padding-bottom:0}.time{color:var(--mint);font-variant-numeric:tabular-nums}
+    .checklist{margin:0;padding-left:20px;color:#c2cdc5}.checklist li{margin:7px 0}.callout{padding:13px 15px;border:1px solid #57482f;border-radius:7px;background:#201a13;color:#edd49f}
+    a{color:#bde9ca;text-decoration:underline;text-underline-offset:3px}.footer{margin-top:24px;color:#8f9b93;font-size:12px}
+    @media(max-width:600px){main{padding:28px 14px 48px}section{padding:17px 15px}.linkrow{grid-template-columns:1fr;gap:3px}.beat{grid-template-columns:64px 1fr}.copy button{float:none;margin:0 0 12px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="top"><img class="mark" src="./public/images/vestra-mark-v12.png" alt=""><span class="brand">vestra</span></div>
+  <p class="eyebrow">Stocklana · Submission draft</p>
+  <h1>Vestra</h1>
+  <p class="tagline">Vestra brings PreStocks company news and token data together, lets Bull, Bear, and Neutral examine the same evidence, then gives you a Council summary you can read or hear.</p>
+  <div class="meta"><span class="pill primary">Main Track</span><span class="pill">PreStocks · Best Use of PreStocks</span><span class="pill">Solana</span></div>
+
+  <section class="copy">
+    <button type="button" onclick="copyField('description',this)">Copy description</button>
+    <h2>Project description</h2>
+    <div id="description">
+      <p>Researchers in PreStocks have to piece together a private company’s news, its PreStocks quote, and its on-chain market from separate pages. That makes it hard to compare opposing readings of the same headline or see what the token did around it.</p>
+      <p>Vestra brings that work into one desk for companies in the PreStocks catalogue. Its Catalyst Monitor links company headlines to the selected token’s latest completed pool close, liquidity, and 24-hour volume, alongside the PreStocks quote and reference mark. A market-read check flags large price gaps, low activity, and stale closes without calling a clean snapshot fair value. Headlines that do not name the company or come from its publisher are kept out of the AI evidence packet.</p>
+      <p>Three Gemini analysts read the same server-fetched source packet in parallel: a bull makes the upside case, a bear tests the risks, and a neutral analyst separates direct statements from unknowns. A Council chair reviews their arguments against the headlines, summarizes the evidence and uncertainties, and can generate an optional two-voice audio brief. Supported claims link to the publisher. A live node graph shows each stage as it finishes.</p>
+      <p>Market replay follows the selected PreStocks mint to a Solana USDC pool. Users can inspect daily prices in LuxAlgo Vela, compare closes around a dated headline, and explore a sample 5/20-day moving-average strategy with adjustable costs beside buy-and-hold.</p>
+      <p>Solana is where these PreStocks tokens and pools trade, so Vestra follows the exact on-chain mint instead of substituting unrelated equity or FX data. Pool prices are separate from PreStocks quotes and are not a PreStocks return series. Vestra shows pool volume and warns when trading is thin or prices diverge. Saved-company checks show quote movement since the prior browser-local check and refresh every ten minutes while open. Crypto headlines stay separate from company evidence. The app is read-only and never trades; it has no Telegram or background notifications.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tracks</h2>
+    <div class="tracks"><span class="track">Main Track</span><span class="track">PreStocks · Best Use of PreStocks</span></div>
+    <p style="margin-top:14px">Vestra selects only assets returned by the PreStocks catalogue; it does not integrate other pre-IPO tokens. Stocklana lists a $100,000 Main Track prize pool and a $10,000 PreStocks bounty with three awards: $5,000, $3,000, and $2,000. The PreStocks bounty is the closest fit because Vestra uses that catalogue and follows the selected mint throughout.</p>
+  </section>
+
+  <section>
+    <h2>Links and team</h2>
+    <div class="links">
+      <div class="linkrow"><strong>GitHub repository</strong><span class="placeholder">https://github.com/Shawnchee/Vestra — contains the current app and submission materials; confirm judge access before using it as the project link.</span></div>
+      <div class="linkrow"><strong>Live demo</strong><span class="placeholder">No public deployment yet. This checkout has no Vercel project linked.</span></div>
+      <div class="linkrow"><strong>Demo video</strong><span class="placeholder">Optional; record and add an unlisted video URL if available.</span></div>
+      <div class="linkrow"><strong>Team</strong><span class="placeholder">Add the submitter and collaborator names/links in the form.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Demo script · 2:50</h2>
+    <div class="script">
+      <div class="beat"><strong class="time">0:00–0:20</strong><span>“Vestra puts PreStocks company news and token data together, then shows me Bull, Bear, and Neutral views with a Council summary.” Show the Research view.</span></div>
+      <div class="beat"><strong class="time">0:20–0:45</strong><span>Vestra opens on Anthropic PreStocks. Point out the token quote and reference mark, the latest pool close, volume, and the market-read flags. These readings change; a clean check does not prove fair value.</span></div>
+      <div class="beat"><strong class="time">0:45–1:25</strong><span>Choose a company-linked headline. Start the debate and show Bull, Bear, and Neutral working in parallel before Council weighs their cases. Follow a citation to the publisher. If Gemini is busy, continue to Market replay without claiming a completed readout.</span></div>
+      <div class="beat"><strong class="time">1:25–2:00</strong><span>Open Market replay. Show that the chart uses the same company token selected in Research. Point to the Vela chart, liquidity, and volume. Select a dated headline and inspect nearby prices.</span></div>
+      <div class="beat"><strong class="time">2:00–2:30</strong><span>Expand the strategy simulation. Explain that it compares average pool prices over 5 and 20 days, acts at the next available daily open, and includes adjustable costs and drawdown. These are discovered-pool results, not PreStocks returns.</span></div>
+      <div class="beat"><strong class="time">2:30–2:50</strong><span>Switch to SpaceX to show the linked PreStocks notice that it has gone public and gives a token-conversion deadline. Point out that issuer lifecycle and pool-price warnings are separate. Close: “Vestra helps researchers see both the case and the quality of the evidence behind it.”</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Before submitting</h2>
+    <ul class="checklist">
+      <li>Provide at least one accessible GitHub, live demo, or video link; Stocklana requires one.</li>
+      <li>Confirm team members and any required project fields in the submission form.</li>
+      <li>Review the demo against the published deadline: Friday, September 25, 2026 at 4:00pm ET.</li>
+      <li>Choose the submitting account and connect its wallet; the form is gated on the official site.</li>
+      <li>Run one fresh Gemini debate and check its evidence links before recording. One four-role run completed; the Bear role used its disclosed fallback after a temporary provider failure.</li>
+      <li>Do not claim that the pool simulation represents PreStocks returns or that the product places trades.</li>
+    </ul>
+    <p class="callout" style="margin-top:15px">Submission status: draft prepared. The repository and documentation have been pushed to GitHub. Confirm it is accessible to judges or provide a public demo/video URL. The submitter must choose the account/wallet and confirm team details in the form. Check the official Stocklana page for the live deadline and status.</p>
+    <p style="margin-top:14px">Official details: <a href="https://hackathons.solana.com/hackathons/stocklana">Stocklana hackathon page</a>.</p>
+  </section>
+  <p class="footer">Vestra is an independent research tool and is not affiliated with the referenced companies. This draft describes current functionality and known data limits.</p>
+</main>
+<script>
+  async function copyField(id,button){const element=document.getElementById(id);if(!element)return;const original=button.textContent;let copied=false;try{if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(element.innerText);copied=true}}catch{}if(!copied){const selection=window.getSelection();const range=document.createRange();range.selectNodeContents(element);selection?.removeAllRanges();selection?.addRange(range)}button.textContent=copied?"Copied":"Text selected";setTimeout(()=>button.textContent=original,1600)}
+</script>
+</body>
+</html>
