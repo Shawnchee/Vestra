@@ -1,12 +1,14 @@
 # Vestra brand
 
-**Positioning:** evidence-led company research for tokenized private markets on Solana.
+**Positioning:** clear, evidence-led research for PreStocks company tokens on Solana.
 **Voice:** precise, calm, candid about uncertainty.
 **Status:** active
 
 ## Visual direction
 
 Use a dark, comfortable-density research workstation. Borrow broad interaction patterns from crypto trading apps (clear asset search, price hierarchy, concise market data, dense but scannable panels) while keeping Vestra’s identity, composition, icons, and wording original. Do not reproduce any app’s exact layout, logos, illustrations, or proprietary assets.
+
+Use the custom Vestra symbol in `public/images/vestra-mark-v12.png`: a transparent ivory-and-mint mark that brings the opposing market strokes together into a clear V. Use the generated editorial texture in `public/images/vestra-market-atmosphere-v4.webp`; its mineral edges and topographic lines add depth while leaving the center calm for research. Keep enough overlay contrast for dense data and text. For selected companies, load the mapped company site’s own favicon first, then Google’s favicon cache, and finally the image from the live PreStocks catalogue; reuse the result in the saved-company list. Use Solana’s official mark only to identify the network, without recoloring or distorting it. The network image points to Solana’s official [Brand & Press](https://solana.com/branding) assets page. Headline rows use their publisher’s site favicon when recognized, with an initial as the fallback.
 
 ## Palette
 
@@ -17,7 +19,7 @@ Use a dark, comfortable-density research workstation. Borrow broad interaction p
 - **Primary text:** `#F0F4F1`
 - **Secondary text:** `#A0AAA4`
 - **Muted text:** `#707B74`
-- **Vestra mint:** `#9AF0C0` (primary accent, active states, links)
+- **Vestra chartreuse:** `#BDF23C` (primary accent, active states, links; paired with warm ivory in the logo)
 - **Positive:** `#70D6A3`
 - **Negative:** `#F08A8A`
 - **Warning:** `#E9BF72`

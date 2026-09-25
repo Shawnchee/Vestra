@@ -5,10 +5,11 @@
 **Hackathon:** Stocklana
 **Primary track:** Main track
 **Cash bounty target:** PreStocks Best Use of PreStocks
+**Submission deadline:** September 25, 2026, 4:00pm ET (check the official page for current status)
 
 ## 1. Product summary
 
-Vestra is an evidence-led research workstation for PreStocks. It combines current PreStocks token and reference-mark data, relevant company news, and a multi-perspective AI debate. Instead of returning a single opaque “AI sentiment” score, Vestra gives the user a source-linked bull case, bear case, and neutral editor synthesis, then places those views beside observed token-market context.
+Vestra is an evidence-led research workstation for PreStocks. It combines current PreStocks token and reference-mark data, relevant company news, and a multi-perspective AI debate. Instead of returning a single opaque “AI sentiment” score, Vestra gives the user source-linked Bull, Bear, and Neutral analyses followed by a Council synthesis, then places those views beside observed token-market context.
 
 ## 2. Problem
 
@@ -28,7 +29,7 @@ Vestra supports research, not trading execution. It does not tell users what to 
 
 ## 5. Hackathon fit and constraints
 
-Stocklana’s PreStocks bounty invites research, discovery, analysis, AI agents, simulations, and other uses that drive value for PreStocks. The listed bounty is $10,000 total across three awards. Any non-PreStocks pre-IPO token integration makes a project ineligible for that bounty. All company-token choices in Vestra must therefore come from PreStocks’ own catalogue.
+Stocklana’s PreStocks bounty invites research, discovery, analysis, AI agents, simulations, and other uses that drive value for PreStocks. The listed bounty is $10,000 total across three awards. Any non-PreStocks pre-IPO token integration makes a project ineligible for that bounty. All company-token choices in Vestra must therefore come from PreStocks’ own catalogue. Submission deadline: September 25, 2026, 4:00pm ET.
 
 Stocklana judging also looks for a real user/problem, a working end-to-end demo, a reason the product belongs on Solana, and execution quality. Vestra’s on-chain market context and the PreStocks-issued Solana mints are central to its flow.
 
@@ -41,7 +42,7 @@ Stocklana judging also looks for a real user/problem, a working end-to-end demo,
 5. Read three distinct roles:
    - **Bull analyst:** strongest positive case supported by source IDs.
    - **Bear analyst:** strongest countercase, risks, and missing evidence.
-   - **Editor:** points of agreement, contested claims, unknowns, confidence, and falsifiers.
+   - **Council:** checks analyst claims against evidence and summarizes agreement, disagreement, unknowns, and what could change the read.
 6. Select citations to jump to their source cards; open originals in a new tab.
 7. Review historical token movement or an event window only when timestamped history for the exact PreStocks mint has been validated. Otherwise show a clearly labeled event timeline and current market snapshot without inventing returns.
 
@@ -59,20 +60,30 @@ Stocklana judging also looks for a real user/problem, a working end-to-end demo,
 
 ### 7.2 News discovery
 
-- Search recent coverage for a company name and configured aliases using GDELT DOC API.
+- Search recent coverage for a company name using Google News RSS.
 - Deduplicate by canonical URL/title and filter obvious name collisions.
 - Keep headline, publisher/domain, published time, URL, and query/match context.
 - Bound result count and query window; cache to avoid needless external requests.
-- Clearly distinguish article metadata from model interpretation. Link every card to the source.
+- Clearly distinguish article metadata from model interpretation. Link every card through Google News to the publisher's story.
 - Display a helpful no-results state and do not fabricate articles.
+
+### 7.2.1 Crypto market context
+
+- Fetch the official CoinDesk RSS feed server-side, cache it, validate story URLs and publication dates, and keep the returned headline count bounded.
+- Show crypto stories in a separate market-context panel with clear CoinDesk attribution and publisher links.
+- Never merge general crypto headlines into the private-company evidence packet or imply they describe the selected company.
+- Provide loading and provider-error states without blocking company research or market history.
 
 ### 7.3 Multi-agent debate with Gemini
 
 - Use Google’s official `@google/genai` SDK on the server only.
 - Read `GEMINI_API_KEY` and optional `GEMINI_MODEL` from server environment variables.
-- Default to a currently free-tier text model only after verifying model access in AI Studio; model name must be configurable.
+- Run bull and bear on distinct Gemini models by default (bull/editor inherit `GEMINI_MODEL`; bear defaults to `gemini-3.8-flash`); allow optional per-role overrides and disclose the actual model IDs in results.
+- On temporary provider 5xx/timeouts, retry that role once with a configurable fallback model (default `gemini-3.1-flash-lite`); never retry quota errors or imply a successful debate if both fail.
+- Keep model names configurable and verify access in the project’s Google AI Studio before a live demo.
 - Submit the same limited evidence packet and market snapshot to the bull and bear role prompts.
 - Run editor synthesis after both cases so it can compare them explicitly.
+- Present bull and bear as equal opposing cases with a visible shared-evidence rail; give the editor a separate synthesis area for common ground, disagreements, unknowns, and evidence notes.
 - Request structured output: thesis, claims, evidence IDs, counterpoints, uncertainties, confidence, and falsifiers.
 - Validate returned evidence IDs against the provided packet. Mark unsupported claims unverified; never invent source links.
 - Handle missing key, quota/rate limit, timeout, malformed model output, and provider errors with user-visible recovery messages.
@@ -81,13 +92,13 @@ Stocklana judging also looks for a real user/problem, a working end-to-end demo,
 
 ### 7.4 Historical context / backtesting
 
-- GeckoTerminal's public API exposes exact-mint Solana pool discovery and OHLCV endpoints; a live SpaceX PreStocks/USDC pool returned daily candles. Its public API is beta and rate-limited.
-- The latest observed close from that pool was about five times the PreStocks catalogue's current token quote. This likely reflects a unit/supply/market-data inconsistency, but its cause is not confirmed.
-- Investigate and reconcile actual on-chain swap/trade history for the selected PreStocks mint against PreStocks' catalogue price before enabling charts or strategy results.
-- Validate token decimals, quote asset, timestamps, missing intervals, liquidity, and history depth before charting.
+- GeckoTerminal's public API exposes exact-mint Solana pool discovery and OHLCV endpoints. Vestra discovers USDC pools for the selected mint at runtime, selects a pool with liquidity and recent volume, and displays daily USD candles with pool/source attribution. Its public API is beta, cached, and rate-limited.
+- In the September 24, 2026 snapshot, the latest close from the selected pool was about five times the PreStocks catalogue quote. This may reflect a unit, supply, or market-data inconsistency; the cause is not confirmed. Treat this as a live observation, not a stable conversion factor.
+- Investigate and reconcile actual on-chain swap/trade history for the selected PreStocks mint against PreStocks' catalogue price before enabling strategy results. Keep the separate pool chart explicitly labeled while that check is pending.
+- Validate token decimals, quote asset, timestamps, missing intervals, liquidity, and history depth before treating chart history as comparable to the PreStocks quote.
 - Only label a result “backtest” when it uses a documented, reproducible rule over verified historical observations and states date range, sample size, fees/slippage, and benchmark.
 - Do not use Dukascopy FX or another unrelated asset series as a proxy.
-- Until prices reconcile, present the live token-vs-mark comparison plus sourced event timeline, explain the limitation, and avoid simulated precision.
+- Keep DEX-pool USD history separate from the PreStocks quote. Show a warning when the latest candle materially differs from the catalogue quote. A clearly labeled pool-only historical simulation may be shown over the same exact-mint candles, but never imply its returns represent PreStocks catalogue prices or executable returns. State the interval, date window, sample size, benchmark, execution timing, cost assumption, omitted costs, and low-liquidity limitation.
 
 ### 7.5 Responsive interface and accessibility
 
@@ -126,7 +137,8 @@ Create an original Vestra identity using familiar patterns from successful crypt
 ## 11. Success criteria
 
 - A first-time viewer can identify the selected PreStocks company and understand token price versus mark price.
-- A user can load real company news, run the bull/bear/editor flow when a Gemini key is configured, and follow citations to source cards and originals.
+- A user can load real company news, run the Bull/Bear/Neutral/Council flow when a Gemini key is configured, and follow citations to source cards and originals.
+- A user can see general crypto market headlines in a separately attributed context feed; those stories never enter the company debate packet.
 - All data is visibly sourced and timestamped; errors and missing history are honest and recoverable.
 - At least one selected PreStocks mint has verified usable history before a backtest is shown.
 - App works in desktop and mobile layouts and can be demoed from a fresh session.
@@ -138,17 +150,18 @@ Create an original Vestra identity using familiar patterns from successful crypt
 - **UI:** Tailwind CSS, shadcn/ui primitives where useful, Lucide icons, CSS transitions.
 - **AI:** official `@google/genai` SDK, server route/actions only.
 - **Charts:** choose an actively maintained chart library compatible with license and required interaction; never imply proprietary LuxAlgo signals unless explicitly licensed and integrated.
-- **Data flow:** PreStocks catalogue → validated domain types → UI; GDELT discovery → normalized article packet → validated Gemini role outputs.
+- **Data flow:** PreStocks catalogue → validated domain types → UI; Google News RSS → company evidence packet → validated Gemini role outputs; CoinDesk RSS → separately labeled crypto context panel.
 - **Secrets:** `.env.local` ignored by Git; `.env.example` contains names only.
 - **Persistence:** keep initial demo data ephemeral unless persistence is needed; do not store secrets or unverified AI claims.
 
 ## 13. External references
 
 - Stocklana: https://hackathons.solana.com/hackathons/stocklana
+- CoinDesk's RSS feed documentation: https://www.coindesk.com/coindesk-news/2021/09/17/coindesk-rss
 - PreStocks catalogue: https://prestocks.com/api/prestocks
 - PreStocks products/disclosures: https://prestocks.com/products
 - Gemini pricing/free tier: https://ai.google.dev/gemini-api/docs/pricing
 - Gemini rate limits: https://ai.google.dev/gemini-api/docs/rate-limits
 - Google GenAI SDK: https://ai.google.dev/gemini-api/docs/libraries
 - GeckoTerminal public API and OHLCV reference: https://api.geckoterminal.com/docs/index.html
-- GDELT DOC API: https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/
+- Google News RSS: https://news.google.com/rss/search?q=SpaceX&hl=en-US&gl=US&ceid=US:en
