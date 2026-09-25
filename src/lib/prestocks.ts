@@ -51,7 +51,9 @@ export async function getPreStocks(): Promise<{ assets: PreStock[]; fetchedAt: s
       headers: { Accept: "application/json" },
     });
     if (!response.ok) throw new Error(`PreStocks returned HTTP ${response.status}`);
-    const assets = parsePreStocks(await response.json());
+    const raw = await response.text();
+    if (new TextEncoder().encode(raw).byteLength > 2_000_000) throw new Error("PreStocks response exceeded the size limit");
+    const assets = parsePreStocks(JSON.parse(raw));
     if (!assets.length) throw new Error("PreStocks returned no valid assets");
     return { assets, fetchedAt: new Date().toISOString(), error: null };
   } catch {
