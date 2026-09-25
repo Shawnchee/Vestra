@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { limitDebateRequest } from "@/lib/debate-rate-limit";
 
 export const maxDuration = 60;
 
@@ -44,11 +43,6 @@ export async function POST(request: Request) {
     !(turn as Record<string, string>).text.trim() ||
     (turn as Record<string, string>).text.length > 700
   )) return NextResponse.json({ error: "The council transcript is invalid." }, { status: 400 });
-
-  const rateLimit = await limitDebateRequest(request);
-  if (rateLimit.status === "unconfigured") return NextResponse.json({ error: "Audio brief protection is not configured for this deployment." }, { status: 503 });
-  if (rateLimit.status === "unavailable") return NextResponse.json({ error: "Audio brief protection is temporarily unavailable." }, { status: 503 });
-  if (rateLimit.status === "limited") return NextResponse.json({ error: "Too many AI requests. Wait before making another audio brief." }, { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } });
 
   try {
     const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {

@@ -30,8 +30,6 @@ flowchart TB
     HistoryAPI["/api/market-history<br/>pool discovery · candles"]
     CryptoAPI["/api/crypto-news<br/>separate crypto context"]
     PodcastAPI["/api/podcast<br/>bounded two-speaker transcript"]
-    DebateGuard["Debate rate-limit check<br/>local in development · Upstash in production"]
-    AudioGuard["Audio rate-limit check<br/>local in development · Upstash in production"]
   end
 
   subgraph Sources["External data and AI"]
@@ -51,8 +49,7 @@ flowchart TB
   NewsAPI --> GoogleNews
   DebateAPI --> PreStocks
   DebateAPI --> GoogleNews
-  DebateAPI --> DebateGuard
-  DebateGuard --> Gemini
+  DebateAPI --> Gemini
   HistoryAPI --> PreStocks
   Gemini -->|server-sent debate events| Research
   HistoryAPI --> Gecko
@@ -60,8 +57,7 @@ flowchart TB
   CryptoAPI --> CoinDesk
   CoinDesk -->|separate market context| Replay
   Research -->|user requests audio| PodcastAPI
-  PodcastAPI --> AudioGuard
-  AudioGuard --> GeminiTTS
+  PodcastAPI --> GeminiTTS
   GeminiTTS -->|audio/wav| Audio
 ```
 
@@ -97,7 +93,7 @@ Add `GEMINI_API_KEY` to `.env.local` to enable live debate and Council audio. Ke
 | `GEMINI_TTS_MODEL` | `gemini-3.8-flash-lite-tts` | On-demand speech model |
 | `NEWS_MAX_RECORDS` | `12` | Company headline results, capped at 20 |
 
-For production, configure `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, and a private `RATE_LIMIT_HASH_SALT` of at least 32 characters. Debate and audio requests fail closed without production rate-limit configuration. Vestra HMAC-hashes trusted client IPs before sending identifiers to Upstash.
+Vestra does not require a separate rate-limit database. The public debate and audio routes rely on Gemini's own project quotas and provider limits; monitor usage in Google AI Studio. The Gemini key stays on the server and is never exposed to the browser.
 
 ## Demo flow
 

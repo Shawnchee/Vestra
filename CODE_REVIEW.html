@@ -43,7 +43,7 @@
 
   <section class="verdict" aria-label="Release verdict">
     <strong>Overall: C — keep private until the credential is rotated and hosted limits are configured.</strong>
-    <p>The app builds; Research, Market replay, the four-role debate, and Council audio work in the local demo. A Gemini API key was previously pasted into chat. The debate route now has a production fail-closed limiter; a deployment still needs Upstash credentials and the replacement Gemini key.</p>
+    <p>The app builds; Research, Market replay, the four-role debate, and Council audio work in the local demo. The user chose to remove Vestra's Upstash limiter for the hackathon deployment. Public AI requests now rely on Gemini project quotas; set usage alerts and monitor the key.</p>
   </section>
 
   <h2>Scores</h2>
@@ -64,10 +64,10 @@
     <p><strong>Fix:</strong> create a replacement key in Google AI Studio, restrict it to the Gemini API and suitable quota limits, replace the value in the ignored <code>.env.local</code>, then revoke the old key. Never put the replacement in client code, a submission form, or a commit.</p>
   </article>
   <article class="finding high">
-    <div class="eyebrow">High · Hosted setup required</div>
-    <h3>Configure Upstash before public deployment</h3>
-    <p>The debate route now uses an atomic Upstash sliding window in production and returns HTTP 429 with a retry time when limits are reached. It fails closed until a Redis REST URL, token, and private hash salt are configured.</p>
-    <p><strong>Required limits:</strong> 5 debates per 15 minutes per hashed client IP and 40 total per day. Client IPs are HMAC-hashed before Upstash receives them. Local development uses an in-process fallback only.</p>
+    <div class="eyebrow">High · Public AI usage</div>
+    <h3>Monitor Gemini quota on the public demo</h3>
+    <p>Vestra no longer has an application-level request limiter. Anyone with access to the public demo can trigger Gemini-backed debate and audio requests, subject to Gemini's project quotas and limits.</p>
+    <p><strong>Mitigation:</strong> keep the Gemini key server-side, review usage in Google AI Studio, and disable or rotate the key if usage is unexpected. This is an accepted hackathon tradeoff, not a production abuse-control design.</p>
   </article>
   <article class="finding">
     <div class="eyebrow">Medium · automated coverage</div>
@@ -84,7 +84,7 @@
     <li>PreStocks and Google News responses are capped at 2 MB; the Gemini call deadline is aligned with the browser’s overall wait window.</li>
     <li>Research now renders six headlines because the AI can cite the sixth item.</li>
     <li>30D/90D chart windows now filter by calendar time. The strategy uses the full fetched pool history and says missing pool days can make the 5/20-day rule span more calendar days.</li>
-    <li>Production debate requests now fail closed until the configured Upstash sliding-window limit is available.</li>
+    <li>Debate and audio routes retain request validation, origin checks, bounded request sizes, timeouts, and provider error handling. No separate application rate limiter is enabled.</li>
   </ul>
 
   <h2>What was verified</h2>

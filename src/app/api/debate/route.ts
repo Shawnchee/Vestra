@@ -1,7 +1,6 @@
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { NextResponse } from "next/server";
 import { getPreStocks } from "@/lib/prestocks";
-import { limitDebateRequest } from "@/lib/debate-rate-limit";
 import { getCompanyNews, type CompanyHeadline } from "@/lib/company-news";
 
 export const maxDuration = 60;
@@ -177,16 +176,6 @@ export async function POST(request: Request) {
         : null,
       observedAt: catalogue.fetchedAt,
     };
-    const rateLimit = await limitDebateRequest(request);
-    if (rateLimit.status === "unconfigured") {
-      return NextResponse.json({ error: "Debate protection is not configured for this deployment.", code: "RATE_LIMIT_NOT_CONFIGURED" }, { status: 503 });
-    }
-    if (rateLimit.status === "unavailable") {
-      return NextResponse.json({ error: "Debate protection is temporarily unavailable. Try again shortly.", code: "RATE_LIMIT_UNAVAILABLE" }, { status: 503 });
-    }
-    if (rateLimit.status === "limited") {
-      return NextResponse.json({ error: "Too many debates have been requested. Wait before trying again.", code: "RATE_LIMITED" }, { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } });
-    }
     let evidence: Evidence[];
     try {
       const maxRecords = Math.min(20, Math.max(1, Number(process.env.NEWS_MAX_RECORDS) || 12));

@@ -1,12 +1,11 @@
 # Vestra deployment handoff
 
-The current `main` branch includes the app and its pitch/submission materials. This checkout is not linked to a hosting project, so there is no public demo URL yet. Before a public deployment, rotate the Gemini key that was shared in chat and configure a fresh key and the Upstash values below in private hosting settings.
+The current `main` branch includes the app and its pitch/submission materials. Vestra does not use an external rate-limit database. Before deployment, configure the Gemini key in private hosting settings and monitor its project quota because public debate and audio requests use Gemini directly.
 
 ## Before connecting a host
 
 1. Choose a judge link. The GitHub repo can stay private if a public deployment or demo video is provided; judges need at least one accessible link.
-2. Create an Upstash Redis database for the debate request limits.
-3. In the host’s private environment-variable settings, add the variables below. Do not put real values in this file, `.env.example`, source code, or chat.
+2. In the host’s private environment-variable settings, add the variables below. Do not put real values in this file, `.env.example`, source code, or chat.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
@@ -17,11 +16,7 @@ The current `main` branch includes the app and its pitch/submission materials. T
 | `GEMINI_TTS_MODEL` | Optional | On-demand Council audio; defaults to `gemini-3.8-flash-lite-tts` and uses the same Gemini key. |
 | `GEMINI_COUNCIL_MODEL` | Optional | Final synthesis model; defaults to stable `gemini-3.8-flash`. `gemini-3.1-pro-preview` is an optional paid Preview model. |
 | `GEMINI_BULL_MODEL`, `GEMINI_BEAR_MODEL`, `GEMINI_NEUTRAL_MODEL` | Optional | Override individual analyst models; see `.env.example`. |
-| `UPSTASH_REDIS_REST_URL` | Yes for production debate | Redis REST endpoint for shared request limits. |
-| `UPSTASH_REDIS_REST_TOKEN` | Yes for production debate | Private Redis REST token. |
-| `RATE_LIMIT_HASH_SALT` | Yes for production debate | Private random value, at least 32 characters, used to HMAC-hash client IP identifiers. |
-
-Optional model overrides are documented in `.env.example`. Add settings to Production and any Preview environment you intend to share. The production debate route fails closed until all three Upstash values are present.
+Optional model overrides are documented in `.env.example`. Add the Gemini key to Production and any Preview environment you intend to share. No Upstash or other rate-limit environment variables are required.
 
 ## Connect and deploy
 
@@ -45,10 +40,6 @@ This is a standard Next.js app. Vercel documents Next.js as zero-configuration: 
 Set these as private, server-side values for **Production** and for **Preview** if a preview will be shown to judges:
 
 - `GEMINI_API_KEY` — use a newly rotated key for the public demo; do not reuse the current local key or expose it with a `NEXT_PUBLIC_` prefix.
-- `UPSTASH_REDIS_REST_URL`
-- `UPSTASH_REDIS_REST_TOKEN`
-- `RATE_LIMIT_HASH_SALT` — a private random value of at least 32 characters.
-
 Recommended model settings are `GEMINI_MODEL=gemini-3.5-flash-lite` and `GEMINI_FALLBACK_MODEL=gemini-3.1-flash-lite`. Role-specific overrides and `NEWS_MAX_RECORDS` are optional. Do not set `NEXT_PUBLIC_SITE_URL` to `localhost` in Vercel; `src/app/layout.tsx` already uses Vercel's generated deployment URL when no explicit public site URL is configured. Vercel makes newly added variables available on a new deployment, so redeploy after setting them. See [Vercel environment variables](https://vercel.com/docs/environment-variables).
 
 ### After linking the project
@@ -56,5 +47,5 @@ Recommended model settings are `GEMINI_MODEL=gemini-3.5-flash-lite` and `GEMINI_
 1. Choose an existing Vercel project or create a new one in the authenticated account, then link this repository root. If using Git integration, deploy the current `main` branch.
 2. Add the server-side environment variables above without placing values in the repository or chat.
 3. Build a Preview deployment first and check its access in a logged-out/private browser window. Vercel deployment protection can make preview links require authentication; judges need an unauthenticated route or a valid shareable link. See [Deployment Protection](https://vercel.com/docs/deployment-protection).
-4. Exercise Research, live four-role debate, the same-token Market replay, CoinDesk context, and the strategy panel on the deployed URL. Confirm the production rate limit is configured before relying on debate generation.
+4. Exercise Research, live four-role debate, the same-token Market replay, CoinDesk context, and the strategy panel on the deployed URL. Monitor Gemini usage and quota during the public demo.
 5. Use the checked, judge-accessible deployment URL in the Stocklana form only after the owner chooses to publish and submit.

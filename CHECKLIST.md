@@ -72,8 +72,8 @@ Use this as the source of truth while building. Check an item only after its res
 - [x] Add a branded 1200×630 Open Graph and X preview card using the Vestra mark; verify both generated routes and page metadata locally.
 - [x] Export and refresh the branded share card as a standalone 1200×630 PNG for the hackathon listing or project page.
 - [x] Add PreStocks economic-exposure and product-risk disclosure link.
-- [x] Add process-local debate request limits for development and fail-closed Upstash REST limits for production; hashed client identifiers, 5 requests/15 minutes/IP, 40 requests/day total. Upstash configuration is required before deploying.
-- [ ] Before public deployment, set the three Upstash values from `.env.example` in the hosting provider’s private environment settings; debate generation intentionally returns 503 until then.
+- [x] (Historical; removed for public hackathon demo) Add process-local debate request limits and fail-closed Upstash REST limits for production.
+- [x] Remove the mandatory Upstash setup so public debate and audio work without a separate rate-limit database; monitor Gemini usage for the hackathon demo.
 - [x] Verify the clean-start demo flow without seeded results: `/` opens Anthropic Research, fetches current PreStocks/news data, runs a live three-role debate, and the selected asset carries into its pool-backed Market replay view. Rechecked on September 25: all three Gemini roles returned, six headline sources were visible, the same ANTHROPIC mint carried to Market replay, and the Vela chart loaded 27 candles.
 - [x] Add a README with install/run steps, product summary, data sources, and limitations.
 - [x] Draft Stocklana form copy and a short demo walkthrough in `SUBMISSION.md`.
@@ -101,7 +101,7 @@ Use this as the source of truth while building. Check an item only after its res
 
 ## Submission-day audit — September 25, 2026
 
-The official page was rechecked at 00:35 UTC: it was still marked LIVE, showed about 20 hours remaining, 278 submissions, and requires one accessible GitHub, live demo, or video link. Fresh Research and Market replay views loaded current PreStocks data, six Anthropic headlines, the official Solana/PreStocks marks, company marks, and the selected Figure AI USDC pool with a Vela chart. This pass fixed the Google News source footer’s misleading leading “N” badge. The open items above are still open: controlled failure-state QA, an app screenshot or short demo recording, price-basis explanation, production Upstash configuration, and an accessible public link/team details for the form. No external release or form action has been taken.
+The official page was rechecked at 00:35 UTC: it was still marked LIVE, showed about 20 hours remaining, 278 submissions, and requires one accessible GitHub, live demo, or video link. Fresh Research and Market replay views loaded current PreStocks data, six Anthropic headlines, the official Solana/PreStocks marks, company marks, and the selected Figure AI USDC pool with a Vela chart. This pass fixed the Google News source footer’s misleading leading “N” badge. The open items above are still open: controlled failure-state QA, an app screenshot or short demo recording, price-basis explanation, Gemini usage monitoring, and an accessible public link/team details for the form. No external release or form action has been taken.
 
 ### Live demo smoke-check — September 25, 2026 (00:35 UTC)
 
@@ -141,7 +141,7 @@ The official page was rechecked at 00:35 UTC: it was still marked LIVE, showed a
 
 - Rewrote the entry description in `SUBMISSION.md` and `SUBMISSION.html` as a 216-word scan-friendly explanation of the user problem, product flow, exact-mint Solana rationale, implementation, known data limitations, and next step. The README social card uses the V12 logo and was rendered from the current Open Graph image route.
 - Corrected `DEPLOYMENT.md`: `main` is 39 commits ahead of `origin/main`, has additional uncommitted changes, and has not been pushed. The host project remains unlinked; no deployment or public visibility change was made.
-- Still outstanding: judge-accessible GitHub/demo/video URL, final team/wallet choices, production Upstash configuration, a recorded app walkthrough, rendered browser verification of forced provider-error states, and an explanation for the pool-versus-PreStocks price basis. Do not describe the entry as submitted or deployed.
+- Still outstanding at that historical checkpoint: judge-accessible GitHub/demo/video URL, final team/wallet choices, a recorded app walkthrough, rendered browser verification of forced provider-error states, and an explanation for the pool-versus-PreStocks price basis. Do not describe the entry as submitted or deployed.
 
 ### Final pitch and readiness review — September 25, 2026 (03:14 UTC)
 
@@ -167,3 +167,7 @@ The official page was rechecked at 00:35 UTC: it was still marked LIVE, showed a
 ### Current submission handoff — September 25, 2026
 
 The app and supporting pitch/submission documents are committed and pushed to GitHub `main`. Repo visibility has not been freshly confirmed, and a push alone does not make the repo public. The remaining submission work is to provide one judge-accessible project link, confirm the team and submitting account details, and submit the form before the live deadline. A Vercel deployment is not configured in this checkout.
+
+### Current deployment choice
+
+The user chose to remove the Upstash limiter for the hackathon demo. Debate and audio routes use Gemini's project quotas/provider limits and keep their existing origin, input-size, and error handling. No Upstash database or related Vercel variables are required. This is a deliberate short-term tradeoff; monitor Gemini usage on the public deployment.

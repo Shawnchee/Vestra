@@ -453,5 +453,11 @@ This section supersedes earlier point-in-time notes below that say the docs were
 - The app and the pitch, submission, deployment, checklist, product, and review documents are being committed to `main` and pushed to `https://github.com/Shawnchee/Vestra`. The repo visibility has not been freshly confirmed; provide judges a public demo/video link or confirm repo access before using it in the entry.
 - Current product flow: PreStocks catalogue details and token/mark prices → company-linked headlines → Bull, Bear, and Neutral analyses → Council evidence check and summary → optional two-voice audio brief → same-mint Solana pool replay and illustrative 5/20-day simulation.
 - PreStocks product tokens provide economic exposure under its terms, not ownership rights in the referenced companies. The pool replay is separate from the catalogue quote and must not be pitched as PreStocks historical returns.
-- Local app build and audio route were verified before this documentation-only update. Hosting is not configured here; a judge-accessible demo still requires a deployment and production Gemini/Upstash settings. No Stocklana form submission has been made.
+- Local app build and audio route were verified before this limiter change. Hosting configuration remains outside this checkout; a judge-accessible demo requires a deployment with the Gemini key configured. No Stocklana form submission has been made.
 - The latest live event page check listed the deadline as Friday September 25, 2026 at 4:00pm ET, about 13 hours from the check, and required one accessible GitHub/demo/video link. Recheck the [official Stocklana page](https://hackathons.solana.com/hackathons/stocklana) before submitting.
+
+### Public hackathon deployment choice
+
+- At the user's request, removed the Upstash rate-limit check from debate and audio routes. The public demo now relies on Gemini project quotas/provider limits; the Gemini key remains server-side. Existing same-origin checks, request-size validation, timeouts, and provider error responses remain in place.
+- Removed Upstash settings from `.env.example`, README, and current Vercel deployment instructions; deleted the unused limiter implementation. No code-level abuse limiter remains, so Gemini usage should be monitored and the key rotated or disabled if usage is unexpected.
+- This supersedes earlier notes in this historical report that say production requires Upstash or fails closed without it.
