@@ -530,6 +530,46 @@ h1, h2, h3, p { margin-top: 0; }
   .page-footer a { text-align: left; }
 }
 
+/* Debate layout and loading states */
+.debate-faceoff { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.seat-card-neutral { border-color: rgba(160, 177, 165, .16); background: #141a16; }
+.seat-icon-neutral { border-color: rgba(160, 177, 165, .22); color: #c1cbc3; background: #202722; }
+.seat-card-bull, .seat-card-bear { border-top: 1px solid rgba(160, 177, 165, .16); background: #141a16; }
+.seat-card-bull::after, .seat-card-bear::after { content: none; }
+.seat-skeleton { min-height: 154px; overflow: hidden; }
+.seat-skeleton .seat-topline { justify-content: space-between; }
+.skeleton-chip, .skeleton-line { display: block; border-radius: 4px; background: linear-gradient(90deg, #202923 20%, #2a342d 45%, #202923 70%); background-size: 220% 100%; animation: skeleton-sheen 1.5s linear infinite; }
+.skeleton-chip { width: 48px; height: 14px; }
+.skeleton-line { height: 11px; margin-top: 14px; }
+.skeleton-thesis { width: 86%; height: 18px; margin-top: 21px; }
+.skeleton-short { width: 57%; }
+.seat-card-council { min-height: 90px; }
+.seat-card-council .skeleton-thesis { width: 64%; height: 13px; margin-top: 12px; }
+.seat-card-council .skeleton-line:not(.skeleton-thesis) { display: none; }
+.history-replay { display: grid; gap: 10px; margin-top: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(16, 21, 18, .8); }
+.history-replay-reading { display: grid; grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr)); gap: 12px; }
+.history-replay-reading > div { display: grid; align-content: start; gap: 4px; min-width: 0; }
+.history-replay-reading strong { overflow: hidden; color: #e5ece7; font-size: 14px; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+.history-replay-reading > div:first-child > span:last-child { color: var(--quiet); font-size: 11px; }
+.history-replay-controls { display: flex; align-items: center; gap: 6px; }
+.history-replay-controls input[type="range"] { flex: 1; min-width: 30px; accent-color: var(--accent); }
+.history-replay-controls .text-button { display: grid; place-items: center; width: 40px; height: 40px; }
+.replay-play { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 84px; min-height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: var(--raised); cursor: pointer; }
+.replay-play:hover:not(:disabled) { border-color: #607064; }
+.replay-play:disabled { opacity: .5; cursor: not-allowed; }
+@keyframes skeleton-sheen { to { background-position: -220% 0; } }
+
+/* Remove decorative top-edge glow; keep accents on meaningful controls only. */
+body { background-image: linear-gradient(180deg, rgba(12, 15, 14, .4), rgba(12, 15, 14, .82) 900px), url("/images/vestra-market-atmosphere-v4.webp"); }
+.company-banner { box-shadow: 0 12px 32px rgba(0, 0, 0, .12); }
+.debate-panel { border-top-color: var(--line); }
+.seat-card { border-top-width: 1px; border-top-color: rgba(160, 177, 165, .16); }
+.seat-card-bull, .seat-card-bear { border-top-color: rgba(160, 177, 165, .16); }
+.preview-editor { border-top: 0; }
+@media (max-width: 920px) { .debate-faceoff { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .history-replay-reading { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .skeleton-chip, .skeleton-line { animation: none; } }
+
 /* Vestra’s core workflow: quiet research first, market replay on demand. */
 :root { --radius: 11px; }
 .sidebar { width: 210px; padding: 25px 16px 18px; background: #0f1311; }
@@ -945,3 +985,16 @@ body {
   .issuer-notice { align-items: flex-start; flex-direction: column; }
   .issuer-notice a { white-space: normal; }
 }
+
+/* Final overrides: neutral edges, no decorative lime glow, and three equal debate views. */
+body { background-image: linear-gradient(180deg, rgba(12, 15, 14, .4), rgba(12, 15, 14, .82) 900px), url("/images/vestra-market-atmosphere-v4.webp"); }
+.company-banner { box-shadow: 0 12px 32px rgba(0, 0, 0, .12); }
+.news-panel, .debate-panel, .history-panel, .replay-market-panel { border-top-color: var(--line); }
+.debate-panel { border-top: 1px solid var(--line); }
+.debate-faceoff { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.seat-card { border-top-width: 1px; border-top-color: rgba(160, 177, 165, .16); }
+.seat-card-bull, .seat-card-bear { border-top-color: rgba(160, 177, 165, .16); background: #141a16; }
+.seat-card-bull::after, .seat-card-bear::after { content: none; }
+.preview-editor { border-top: 0; }
+@media (max-width: 920px) { .debate-faceoff { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .history-replay-reading { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

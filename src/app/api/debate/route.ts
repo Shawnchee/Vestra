@@ -93,6 +93,7 @@ function shouldRetryWithFallback(error: unknown): boolean {
 
 async function askRole(
   ai: GoogleGenAI,
+  fallbackAi: GoogleGenAI | null,
   model: string,
   fallbackModel: string,
   role: string,
@@ -104,9 +105,11 @@ async function askRole(
   try {
     return { seat: await ask(ai, model, role, company, evidence, market, extra), model };
   } catch (error) {
-    if (model === fallbackModel || !shouldRetryWithFallback(error)) throw error;
-    console.warn("Gemini primary model is rate limited or temporarily unavailable; retrying with fallback", JSON.stringify({ primary: model, fallback: fallbackModel }));
-    return { seat: await ask(ai, fallbackModel, role, company, evidence, market, extra), model: fallbackModel };
+    const canUseLowerModel = model !== fallbackModel;
+    if ((!canUseLowerModel && !fallbackAi) || !shouldRetryWithFallback(error)) throw error;
+    const retryClient = fallbackAi ?? ai;
+    console.warn("Gemini request unavailable; retrying with the configured fallback.");
+    return { seat: await ask(retryClient, fallbackModel, role, company, evidence, market, extra), model: fallbackModel };
   }
 }
 
@@ -187,17 +190,17 @@ export async function POST(request: Request) {
     if (!evidenceForCompany.length) {
       return NextResponse.json({ error: "No company-named headline or company-publisher source was found. Refresh coverage and try again." }, { status: 400 });
     }
-    const ai = new GoogleGenAI({
-      apiKey,
-      httpOptions: { timeout: 12_000, retryOptions: { attempts: 1, initialDelay: 0.3, maxDelay: 1 } },
-    });
-    const defaultModel = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+    const httpOptions = { timeout: 12_000, retryOptions: { attempts: 1 as const, initialDelay: 0.3, maxDelay: 1 } };
+    const ai = new GoogleGenAI({ apiKey, httpOptions });
+    const fallbackApiKey = process.env.GEMINI_FALLBACK_API_KEY?.trim();
+    const fallbackAi = fallbackApiKey && fallbackApiKey !== apiKey ? new GoogleGenAI({ apiKey: fallbackApiKey, httpOptions }) : null;
+    const defaultModel = process.env.GEMINI_MODEL?.trim() || "gemini-3.5-flash-lite";
     const fallbackModel = process.env.GEMINI_FALLBACK_MODEL?.trim() || "gemini-3.1-flash-lite";
     const models = {
       bull: process.env.GEMINI_BULL_MODEL?.trim() || defaultModel,
-      bear: process.env.GEMINI_BEAR_MODEL?.trim() || "gemini-3.7-flash",
+      bear: process.env.GEMINI_BEAR_MODEL?.trim() || defaultModel,
       neutral: process.env.GEMINI_NEUTRAL_MODEL?.trim() || defaultModel,
-      council: process.env.GEMINI_COUNCIL_MODEL?.trim() || "gemini-3.8-flash",
+      council: process.env.GEMINI_COUNCIL_MODEL?.trim() || defaultModel,
     };
     const encoder = new TextEncoder();
     const stream = new ReadableStream<Uint8Array>({
@@ -206,7 +209,7 @@ export async function POST(request: Request) {
         const node = (id: string, status: "running" | "complete") => send({ type: "node", id, status });
         const role = async (id: "bull" | "bear" | "neutral", label: string, instruction: string) => {
           node(id, "running");
-          const result = await askRole(ai, models[id], fallbackModel, label, company, evidenceForCompany, market, instruction);
+          const result = await askRole(ai, fallbackAi, models[id], fallbackModel, label, company, evidenceForCompany, market, instruction);
           send({ type: "result", id, seat: result.seat, model: result.model });
           node(id, "complete");
           return result;
@@ -222,7 +225,7 @@ export async function POST(request: Request) {
             ]);
             node("council", "running");
             const councilResult = await askRole(
-              ai, models.council, fallbackModel, "research council chair", company, evidenceForCompany, market,
+              ai, fallbackAi, models.council, fallbackModel, "research council chair", company, evidenceForCompany, market,
               `Audit the source fit first: reject any analyst claim that is not directly supported by a cited company-specific headline below. Never treat a citation ID alone as proof. Then synthesize only the remaining supportable points. State a final research read (bullish, mixed, bearish, or insufficient evidence), summarize why, highlight the strongest evidence-backed agreement and disagreement, and name what evidence would change the view. If the source fit is weak, choose insufficient evidence. This is not a buy/sell decision.\nCOMPANY-SPECIFIC HEADLINES: ${JSON.stringify(evidenceForCompany.map(({ id, title, publisher, publishedAt }) => ({ id, title, publisher, publishedAt })))}\nBULL: ${JSON.stringify(bullResult.seat)}\nBEAR: ${JSON.stringify(bearResult.seat)}\nNEUTRAL: ${JSON.stringify(neutralResult.seat)}`,
             );
             send({ type: "result", id: "council", seat: councilResult.seat, model: councilResult.model });

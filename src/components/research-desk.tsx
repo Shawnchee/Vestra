@@ -13,6 +13,7 @@ import {
   Headphones,
   Handshake,
   LoaderCircle,
+  Minus,
   Newspaper,
   RefreshCw,
   Search,
@@ -100,7 +101,7 @@ function ConfidenceSignal({ value }: { value: Seat["confidence"] }) {
 
 function SharedEvidence({ articles }: { articles: Article[] }) {
   return <div className="shared-evidence">
-    <div className="shared-evidence-title"><span className="eyebrow">SAME SOURCES</span><span>All three analysts use the same company-linked headlines</span></div>
+    <div className="shared-evidence-title"><span className="eyebrow">SHARED EVIDENCE</span><span>Same headlines for every view</span></div>
     <div className="shared-evidence-list">{articles.slice(0, 4).map((article, index) => <a className="evidence-chip" href={article.url} target="_blank" rel="noreferrer" key={article.id} title={article.title}><span className="evidence-id">E{index + 1}</span><span className="evidence-source">{article.publisher}</span><span className="evidence-date">{timeLabel(article.publishedAt)}</span></a>)}{articles.length > 4 && <a className="evidence-more" href="#catalyst-monitor">+{articles.length - 4} more</a>}</div>
   </div>;
 }
@@ -112,11 +113,11 @@ function CitationLinks({ ids, articles }: { ids: string[]; articles: Article[] }
     : <span className="unverified"><ShieldCheck size={13} aria-hidden="true" />No headline linked</span>;
 }
 
-function SeatView({ title, kind, seat, articles }: { title: string; kind: "bull" | "bear"; seat: Seat; articles: Article[] }) {
-  const Icon = kind === "bull" ? TrendingUp : ShieldAlert;
+function SeatView({ title, kind, seat, articles }: { title: string; kind: "bull" | "bear" | "neutral"; seat: Seat; articles: Article[] }) {
+  const Icon = kind === "bull" ? TrendingUp : kind === "bear" ? ShieldAlert : Minus;
   return (
     <article className={`seat-card seat-card-${kind}`}>
-      <header className="seat-topline"><span className={`seat-icon seat-icon-${kind}`}><Icon size={17} aria-hidden="true" /></span><div className="seat-title-group"><span className="eyebrow">{title}</span><span className="seat-subtitle">{kind === "bull" ? "The upside case" : "The risk case"}</span></div><ConfidenceSignal value={seat.confidence} /></header>
+      <header className="seat-topline"><span className={`seat-icon seat-icon-${kind}`}><Icon size={17} aria-hidden="true" /></span><div className="seat-title-group"><span className="eyebrow">{title}</span><span className="seat-subtitle">{kind === "bull" ? "The upside case" : kind === "bear" ? "The risk case" : "The balanced view"}</span></div><ConfidenceSignal value={seat.confidence} /></header>
       <p className="seat-thesis">{seat.thesis}</p>
       <div className="claims-list"><div className="claims-heading"><span>MAIN POINTS</span><span>{seat.claims.length}</span></div>
         {seat.claims.map((claim, index) => {
@@ -133,6 +134,20 @@ function SeatView({ title, kind, seat, articles }: { title: string; kind: "bull"
       {seat.falsifiers.length > 0 && <div className="seat-footnote seat-falsifier"><span className="eyebrow">WHAT COULD CHANGE THIS VIEW</span><p>{seat.falsifiers[0]}</p></div>}
     </article>
   );
+}
+
+function SeatSkeleton({ title, kind }: { title: string; kind: "bull" | "bear" | "neutral" | "council" }) {
+  return <article className={`seat-card seat-skeleton seat-card-${kind}`} aria-label={`${title} is generating`}>
+    <header className="seat-topline"><span className="eyebrow">{title}</span><span className="skeleton-chip" /></header>
+    <span className="skeleton-line skeleton-thesis" />
+    <span className="skeleton-line" />
+    <span className="skeleton-line skeleton-short" />
+  </article>;
+}
+
+function SeatSlot({ seat, loading, title, kind, articles }: { seat?: Seat; loading: boolean; title: string; kind: "bull" | "bear" | "neutral"; articles: Article[] }) {
+  if (seat) return <SeatView title={title} kind={kind} seat={seat} articles={articles} />;
+  return loading ? <SeatSkeleton title={title} kind={kind} /> : <div className="seat-pending">No response</div>;
 }
 
 function CouncilPodcast({ seat, company }: { seat: Seat; company: string }) {
@@ -472,12 +487,16 @@ export function ResearchDesk({ assets, fetchedAt, error, initialView, initialSym
             <CatalystMonitor key={asset.mint} asset={asset} articles={articles} newsState={newsState} newsError={newsError} onRefresh={() => void loadNews()} />
 
             <section className="panel debate-panel" id="debate" aria-busy={debateLoading}>
-              <div className="debate-heading"><div><span className="eyebrow">THREE VIEWS · ONE READOUT</span><h3>The debate room</h3><p>Bull, Bear and Neutral review the same headlines. The Council weighs their cases.</p></div><button className="primary-button" type="button" onClick={() => void runDebate()} disabled={debateLoading || newsState !== "ready" || articles.length === 0}>{debateLoading ? <><LoaderCircle className="spin" size={16} aria-hidden="true" />Debate in progress…</> : <><GitCompareArrows size={16} aria-hidden="true" />Start debate</>}</button></div>
+              <div className="debate-heading"><div><span className="eyebrow">AI DEBATE</span><h3>The debate room</h3><p>Three views. One evidence-checked readout.</p></div><button className="primary-button" type="button" onClick={() => void runDebate()} disabled={debateLoading || newsState !== "ready" || articles.length === 0}>{debateLoading ? <><LoaderCircle className="spin" size={16} aria-hidden="true" />Working…</> : <><GitCompareArrows size={16} aria-hidden="true" />Start debate</>}</button></div>
               <DebateFlow nodes={debateNodes} />
               {debateError && <div className="inline-alert debate-error" role="alert"><span>{debateError}</span><button type="button" onClick={() => void runDebate()} disabled={debateLoading}>Try again</button></div>}
-              {debate ? <div className="debate-results"><SharedEvidence articles={debateEvidence} /><div className="debate-faceoff"><div>{debate.bull ? <SeatView title="Bull analyst" kind="bull" seat={debate.bull} articles={debateEvidence} /> : <div className="seat-pending">Bull analyst is weighing the upside…</div>}{debate.neutral && <article className="neutral-card"><span className="eyebrow">NEUTRAL VIEW</span><p>{debate.neutral.thesis}</p><ConfidenceSignal value={debate.neutral.confidence} /></article>}</div><div className="debate-versus" aria-hidden="true"><span>VS</span></div><div>{debate.bear ? <SeatView title="Bear analyst" kind="bear" seat={debate.bear} articles={debateEvidence} /> : <div className="seat-pending">Bear analyst is weighing the risks…</div>}</div></div>{debate.council ? <EditorSynthesis seat={debate.council} articles={debateEvidence} company={asset.name.replace(/\s+PreStocks$/i, "")} /> : <div className="seat-pending council-pending">The Council is comparing all three views…</div>}<div className="debate-disclosure">Bull: {debate.models.bull ?? "pending"} · Bear: {debate.models.bear ?? "pending"} · Neutral: {debate.models.neutral ?? "pending"} · Council: {debate.models.council ?? "pending"}{debate.generatedAt ? ` · ${timeLabel(debate.generatedAt)}` : ""}. Company-specific headlines and market snapshot only; not a buy/sell call.</div></div> : <div className="debate-preview" aria-live="polite">
-                <div className="preview-sides"><div className="preview-side preview-bull"><span className="preview-icon"><TrendingUp size={18} aria-hidden="true" /></span><div><span className="eyebrow">BULL ANALYST</span><strong>Show the upside case</strong></div><span className="preview-wait">{newsState === "ready" ? "Ready" : "Waiting for headlines"}</span></div><div className="preview-divider"><span>AGAINST</span></div><div className="preview-side preview-bear"><span className="preview-icon"><ShieldAlert size={18} aria-hidden="true" /></span><div><span className="eyebrow">BEAR ANALYST</span><strong>Show risks in the same headlines</strong></div><span className="preview-wait">{newsState === "ready" ? "Ready" : "Waiting for headlines"}</span></div></div>
-                <div className="preview-editor"><span className="editor-icon"><Scale size={17} aria-hidden="true" /></span><div><strong>Council readout</strong><span>Compares the three views, evidence, and what could change the read.</span></div><span className="model-note">Four AI roles</span></div>
+              {debate || debateLoading ? <div className="debate-results"><SharedEvidence articles={debateSources.length ? debateSources : debateEvidence} /><div className="debate-faceoff">
+                <SeatSlot seat={debate?.bull} loading={debateLoading} title="Bull" kind="bull" articles={debateEvidence} />
+                <SeatSlot seat={debate?.bear} loading={debateLoading} title="Bear" kind="bear" articles={debateEvidence} />
+                <SeatSlot seat={debate?.neutral} loading={debateLoading} title="Neutral" kind="neutral" articles={debateEvidence} />
+              </div>{debate?.council ? <EditorSynthesis seat={debate.council} articles={debateEvidence} company={asset.name.replace(/\s+PreStocks$/i, "")} /> : debateLoading ? <SeatSkeleton title="Council review" kind="council" /> : null}</div> : <div className="debate-preview" aria-live="polite">
+                <div className="preview-sides"><div className="preview-side preview-bull"><span className="preview-icon"><TrendingUp size={18} aria-hidden="true" /></span><div><span className="eyebrow">BULL</span><strong>Upside case</strong></div><span className="preview-wait">{newsState === "ready" ? "Ready" : "Waiting for headlines"}</span></div><div className="preview-divider"><span>VS</span></div><div className="preview-side preview-bear"><span className="preview-icon"><ShieldAlert size={18} aria-hidden="true" /></span><div><span className="eyebrow">BEAR</span><strong>Risk case</strong></div><span className="preview-wait">{newsState === "ready" ? "Ready" : "Waiting for headlines"}</span></div></div>
+                <div className="preview-editor"><span className="editor-icon"><Scale size={17} aria-hidden="true" /></span><div><strong>Council readout</strong><span>Evidence, agreement, unknowns.</span></div></div>
               </div>}
               <div className="debate-bottom"><span><ShieldCheck size={14} aria-hidden="true" />Headlines linked to sources</span><span>Not investment advice</span></div>
             </section>

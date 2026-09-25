@@ -45,10 +45,8 @@ export async function POST(request: Request) {
   )) return NextResponse.json({ error: "The council transcript is invalid." }, { status: 400 });
 
   try {
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({
+    const apiKeys = [...new Set([apiKey, process.env.GEMINI_FALLBACK_API_KEY?.trim()].filter((key): key is string => Boolean(key)))];
+    const payload = JSON.stringify({
         model: process.env.GEMINI_TTS_MODEL?.trim() || "gemini-3.8-flash-lite-tts",
         input: [{ type: "user_input", content: turns.map((turn) => {
           const item = turn as Turn;
@@ -63,10 +61,20 @@ export async function POST(request: Request) {
           mode: "conversational",
           speakers: [{ speaker: "Maya", voice: "Kore" }, { speaker: "Alex", voice: "Puck" }],
         } },
-      }),
-      signal: AbortSignal.timeout(45_000),
-      cache: "no-store",
-    });
+      });
+    let response: Response | undefined;
+    for (const key of apiKeys) {
+      response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: payload,
+        signal: AbortSignal.timeout(45_000),
+        cache: "no-store",
+      });
+      if (response.ok || apiKeys.at(-1) === key || (response.status !== 429 && response.status < 500)) break;
+      console.warn("Gemini audio request unavailable; retrying with the secondary credential.");
+    }
+    if (!response) return NextResponse.json({ error: "Could not create the audio brief. Try again shortly." }, { status: 503 });
     if (!response.ok) {
       const info = await response.text();
       console.error("Gemini podcast TTS failed", JSON.stringify({ status: response.status }));
