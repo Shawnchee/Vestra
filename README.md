@@ -2,11 +2,11 @@
 
 **Vestra helps PreStocks researchers compare company headlines with Solana pool activity, hear Bull, Bear, and Neutral cases, and review the Council’s evidence-based read.**
 
-PreStocks tokens represent exposure to private-company outcomes. They are not company shares and do not provide IPO allocation. Vestra is a research tool, not a trading venue or investment recommendation.
+PreStocks are Solana tokens that PreStocks describes as tracking pre-IPO company exposure and being backed by SPV exposure to the underlying company shares. They are **not shares in the company**: PreStocks’ legal disclosure says holders get economic exposure only, with no company ownership, voting, or dividend rights, and no IPO allocation. Vestra is a research tool, not a trading venue or investment recommendation.
 
 ## What it does
 
-- **Research:** select a supported PreStocks asset and review its current catalogue snapshot and company-linked headlines.
+- **Research:** select a supported PreStocks asset and review its catalogue description, issuer profile, live quote and reference mark, implied and mark valuations, circulating supply, and Solana mint alongside company-linked headlines.
 - **Bull vs. Bear:** Bull, Bear, and Neutral analysts read the same server-fetched evidence. A Council then checks the arguments against those headlines and summarizes the supported read, agreement, disagreement, unknowns, and what could change it. The debate streams into the UI as each role completes.
 - **Council audio:** create an on-demand, two-voice WAV brief from the Council readout, then play or download it. Speech uses Gemini Flash-Lite TTS and the existing server-side Gemini key.
 - **Market replay:** inspect discovered Solana pool candles in LuxAlgo Vela, compare dated headlines with neighboring closes, and view a simple 5/20-day moving-average simulation with execution-cost assumptions.
@@ -67,7 +67,7 @@ flowchart TB
 
 ### Data boundaries
 
-- PreStocks provides the supported asset catalogue and its displayed quote/mark data. GeckoTerminal supplies discovered pool candles, liquidity, and volume. Pool prices are not interchangeable with PreStocks catalogue prices.
+- PreStocks provides the supported asset catalogue: name, ticker, description, image, issuer profile URL, token mint, token price, mark price, implied valuation, mark valuation, and supply. Vestra surfaces those fields across the company card, quote snapshot, and market details. The per-asset endpoint does not include the product page’s aggregate holders, volume, and transaction counters. GeckoTerminal supplies discovered pool candles, liquidity, and volume; pool prices are not interchangeable with PreStocks catalogue prices.
 - Company headlines are fetched and filtered on the server. Bull, Bear, Neutral, and Council use that same bounded headline packet; headline metadata is not full article text. Broad crypto headlines remain outside the company debate evidence.
 - Debate claims are model-generated analysis, not verified facts or price forecasts. Source links are shown where the model provides valid evidence IDs. A model-specific quota or provider outage can still stop a run; Vestra retries a 429/quota or temporary provider failure once with the configured lower-tier model.
 - The backtest is a descriptive moving-average simulation over the discovered pool’s available candles. It does not model pool depth, price impact, taxes, or a PreStocks mark-price conversion. Missing pool days can affect the calendar span. Past results do not predict future results.
