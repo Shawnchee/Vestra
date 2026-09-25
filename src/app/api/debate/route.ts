@@ -77,7 +77,7 @@ async function ask(ai: GoogleGenAI, model: string, role: string, company: string
   return validateSeat(JSON.parse(text), new Set(evidence.map((item) => item.id)));
 }
 
-function isTemporaryProviderFailure(error: unknown): boolean {
+function shouldRetryWithFallback(error: unknown): boolean {
   const details = error && typeof error === "object" ? error as { status?: unknown; statusCode?: unknown; cause?: unknown; message?: unknown } : {};
   const cause = details.cause && typeof details.cause === "object" ? details.cause as { status?: unknown; statusCode?: unknown; message?: unknown } : {};
   const status = typeof details.status === "number" ? details.status
@@ -85,9 +85,11 @@ function isTemporaryProviderFailure(error: unknown): boolean {
       : typeof cause.status === "number" ? cause.status
         : typeof cause.statusCode === "number" ? cause.statusCode
           : null;
-  if (status !== null) return [500, 502, 503, 504].includes(status);
+  // A Gemini 429 (including RESOURCE_EXHAUSTED) can be model-specific, so try
+  // the configured lower-tier model once before failing this analyst seat.
+  if (status !== null) return [429, 500, 502, 503, 504].includes(status);
   const message = `${typeof details.message === "string" ? details.message : ""} ${typeof cause.message === "string" ? cause.message : ""}`;
-  return /(?:HTTP\s*)?(?:500|502|503|504)|unavailable|overload|high demand|capacity|deadline exceeded|timed? ?out/i.test(message);
+  return /(?:HTTP\s*)?(?:429|500|502|503|504)|quota|rate.?limit|resource_exhausted|unavailable|overload|high demand|capacity|deadline exceeded|timed? ?out/i.test(message);
 }
 
 async function askRole(
@@ -103,8 +105,8 @@ async function askRole(
   try {
     return { seat: await ask(ai, model, role, company, evidence, market, extra), model };
   } catch (error) {
-    if (model === fallbackModel || !isTemporaryProviderFailure(error)) throw error;
-    console.warn("Gemini primary model is temporarily unavailable; retrying with fallback", JSON.stringify({ primary: model, fallback: fallbackModel }));
+    if (model === fallbackModel || !shouldRetryWithFallback(error)) throw error;
+    console.warn("Gemini primary model is rate limited or temporarily unavailable; retrying with fallback", JSON.stringify({ primary: model, fallback: fallbackModel }));
     return { seat: await ask(ai, fallbackModel, role, company, evidence, market, extra), model: fallbackModel };
   }
 }
@@ -241,7 +243,7 @@ export async function POST(request: Request) {
             const message = error instanceof Error ? error.message : "Model request failed";
             const limited = /429|quota|rate.?limit|resource_exhausted/i.test(message);
             const timedOut = /timeout|timed out|deadline exceeded|abort/i.test(message);
-            const busy = isTemporaryProviderFailure(error);
+            const busy = shouldRetryWithFallback(error) && !limited;
             send({ type: "error", error: limited ? "AI quota is temporarily exhausted. Try again later." : timedOut ? "An analyst took too long to answer. Try again." : busy ? "An AI model is busy. Try again shortly." : "The research council could not complete this run. Check model access and try again." });
           } finally {
             controller.close();
