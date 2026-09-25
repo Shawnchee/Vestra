@@ -10,11 +10,12 @@ The current `main` branch includes the app and its pitch/submission materials. V
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `GEMINI_API_KEY` | Yes for live debate | Server-side Gemini access. Use a newly rotated key. |
+| `GEMINI_FALLBACK_API_KEY` | Optional | A second server-side Gemini project key tried after a quota or provider error. |
 | `NEXT_PUBLIC_SITE_URL` | Recommended on non-Vercel hosts | Public origin used to build Open Graph and Twitter preview URLs. Vercel's `VERCEL_URL` is used automatically when this is unset. |
 | `GEMINI_MODEL` | Recommended | Primary model; current default is `gemini-3.5-flash-lite`. |
 | `GEMINI_FALLBACK_MODEL` | Recommended | One retry after temporary provider errors; default is `gemini-3.1-flash-lite`. |
 | `GEMINI_TTS_MODEL` | Optional | On-demand Council audio; defaults to `gemini-3.8-flash-lite-tts` and uses the same Gemini key. |
-| `GEMINI_COUNCIL_MODEL` | Optional | Final synthesis model; defaults to stable `gemini-3.8-flash`. `gemini-3.1-pro-preview` is an optional paid Preview model. |
+| `GEMINI_COUNCIL_MODEL` | Optional | Council model; defaults to `GEMINI_MODEL`. |
 | `GEMINI_BULL_MODEL`, `GEMINI_BEAR_MODEL`, `GEMINI_NEUTRAL_MODEL` | Optional | Override individual analyst models; see `.env.example`. |
 Optional model overrides are documented in `.env.example`. Add the Gemini key to Production and any Preview environment you intend to share. No Upstash or other rate-limit environment variables are required.
 
@@ -23,7 +24,7 @@ Optional model overrides are documented in `.env.example`. Add the Gemini key to
 1. Connect the existing repository to a Next.js hosting project. `main` contains the current app and documentation. No Vercel project is linked in this checkout yet.
 2. Set the environment variables above in the host dashboard.
 3. Build with `npm run build`, deploy, and open the resulting URL in a private browser window to confirm judges can access it without signing in.
-4. Confirm Research loads PreStocks prices and headlines; the market-read flags match the visible quote, mark, pool activity, and close date; Market replay loads the selected mint’s pool chart; CoinDesk context and the strategy panel open; and Bull, Bear, Neutral, and Council finish a live debate.
+4. Confirm Research loads PreStocks prices and headlines; the market-read flags match the visible quote, mark, pool activity, and close date; Market replay loads the selected mint’s pool chart; CoinDesk context opens; Bull, Bear, Neutral, and Council finish a live debate; and the Council brief downloads with citations.
 5. If any demo-critical check fails, keep the disclosure visible and use the existing retry state. Do not claim generated analysis that did not complete.
 6. Put the publicly accessible deployment URL in the Stocklana entry. A public GitHub link or video can be used instead if deployment is unavailable.
 
@@ -40,12 +41,12 @@ This is a standard Next.js app. Vercel documents Next.js as zero-configuration: 
 Set these as private, server-side values for **Production** and for **Preview** if a preview will be shown to judges:
 
 - `GEMINI_API_KEY` — use a newly rotated key for the public demo; do not reuse the current local key or expose it with a `NEXT_PUBLIC_` prefix.
-Recommended model settings are `GEMINI_MODEL=gemini-3.5-flash-lite` and `GEMINI_FALLBACK_MODEL=gemini-3.1-flash-lite`. Role-specific overrides and `NEWS_MAX_RECORDS` are optional. Do not set `NEXT_PUBLIC_SITE_URL` to `localhost` in Vercel; `src/app/layout.tsx` already uses Vercel's generated deployment URL when no explicit public site URL is configured. Vercel makes newly added variables available on a new deployment, so redeploy after setting them. See [Vercel environment variables](https://vercel.com/docs/environment-variables).
+Recommended model settings are `GEMINI_MODEL=gemini-3.5-flash-lite` and `GEMINI_FALLBACK_MODEL=gemini-3.1-flash-lite`. Add `GEMINI_FALLBACK_API_KEY` only if you have a second key, ideally from another Gemini project. Role-specific overrides and `NEWS_MAX_RECORDS` are optional. Do not set `NEXT_PUBLIC_SITE_URL` to `localhost` in Vercel; `src/app/layout.tsx` already uses Vercel's generated deployment URL when no explicit public site URL is configured. Vercel makes newly added variables available on a new deployment, so redeploy after setting them. See [Vercel environment variables](https://vercel.com/docs/environment-variables).
 
 ### After linking the project
 
 1. Choose an existing Vercel project or create a new one in the authenticated account, then link this repository root. If using Git integration, deploy the current `main` branch.
 2. Add the server-side environment variables above without placing values in the repository or chat.
 3. Build a Preview deployment first and check its access in a logged-out/private browser window. Vercel deployment protection can make preview links require authentication; judges need an unauthenticated route or a valid shareable link. See [Deployment Protection](https://vercel.com/docs/deployment-protection).
-4. Exercise Research, live four-role debate, the same-token Market replay, CoinDesk context, and the strategy panel on the deployed URL. Monitor Gemini usage and quota during the public demo.
+4. Exercise Research, live four-role debate, the same-token Market replay, and CoinDesk context on the deployed URL. Monitor Gemini usage and quota during the public demo.
 5. Use the checked, judge-accessible deployment URL in the Stocklana form only after the owner chooses to publish and submit.

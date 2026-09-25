@@ -207,7 +207,6 @@ h1, h2, h3, p { margin-top: 0; }
 .history-source { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); color: #7f8b83; font-size: 12px; }
 .history-source a { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; color: #a9cbb4; white-space: nowrap; }
 .catalyst-replay { margin-top: 18px; padding: 14px; border: 1px solid #333b33; border-radius: 10px; background: #111613; }
-.backtest-panel { margin-top: 18px; padding: 14px; border: 1px solid #333b33; border-radius: 10px; background: linear-gradient(135deg, #141a16, #111613); }
 .crypto-context { margin-top: 17px; padding: 14px; border: 1px solid #303b35; border-radius: 10px; background: #121815; }
 .crypto-context-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .crypto-context-heading p { margin: 5px 0 0; color: #929d94; font-size: 12px; line-height: 1.5; }
@@ -223,15 +222,6 @@ h1, h2, h3, p { margin-top: 0; }
 .crypto-loading { display: flex; align-items: center; gap: 8px; min-height: 74px; color: #95a198; font-size: 12px; }
 .crypto-context-footnote { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; color: #7f8c83; font-size: 12px; line-height: 1.4; }
 .crypto-context-footnote a { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; color: #a9cbb4; white-space: nowrap; }
-.backtest-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin-top: 14px; }
-.backtest-stats > div { display: grid; gap: 5px; padding: 10px; border: 1px solid #2b352e; border-radius: 7px; background: #121713; }
-.backtest-stats .eyebrow { font-size: 12px; }
-.backtest-stats strong { color: #e5ece7; font-size: 15px; font-weight: 570; font-variant-numeric: tabular-nums; }
-.backtest-stats strong.positive { color: var(--positive); }
-.backtest-stats strong.negative { color: var(--negative); }
-.cost-control { display: flex; align-items: center; gap: 7px; color: #aab5ad; font-size: 12px; white-space: nowrap; }
-.cost-control select { min-height: 34px; padding: 0 7px; border: 1px solid #37443a; border-radius: 6px; color: #d7e1d9; background: #171e19; font-size: 12px; }
-.backtest-disclosure { margin: 11px 0 0; color: #89968d; font-size: 12px; line-height: 1.55; }
 .catalyst-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
 .catalyst-heading p { margin: 5px 0 0; color: #929d94; font-size: 12px; line-height: 1.5; }
 .replay-badge { padding: 5px 7px; border: 1px solid #554932; border-radius: 20px; color: #d4b978; font-size: 12px; letter-spacing: .08em; white-space: nowrap; }
@@ -352,6 +342,8 @@ h1, h2, h3, p { margin-top: 0; }
 .editor-heading .eyebrow { color: #9ab2a0; font-size: 12px; }
 .editor-heading strong { color: #e4ebe6; font-size: 13px; font-weight: 590; }
 .editor-heading .confidence-signal { margin-left: auto; }
+.brief-download { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 0 10px; border: 1px solid #46534a; border-radius: 6px; color: #d3e2d7; background: #1a221c; font: inherit; font-size: 12px; cursor: pointer; }
+.brief-download:hover { border-color: #79a587; background: #202b23; }
 .editor-thesis { max-width: 930px; margin: 15px 0 17px; color: #d5ddd7; font-size: 14px; line-height: 1.6; }
 .council-podcast { display: grid; grid-template-columns: minmax(180px, 1fr) auto; align-items: center; gap: 10px 16px; margin: 0 0 16px; padding: 13px 14px; border: 1px solid #303a33; border-radius: 8px; background: #121814; }
 .council-podcast-copy { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -467,8 +459,6 @@ h1, h2, h3, p { margin-top: 0; }
   .history-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 7px; }
   .history-stats strong { font-size: 12px; }
   .history-stats .eyebrow { font-size: 12px; letter-spacing: .04em; }
-  .backtest-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
-  .backtest-stats strong { font-size: 13px; }
   .crypto-stories { grid-template-columns: minmax(0, 1fr); }
   .catalyst-heading { flex-wrap: wrap; }
   .cost-control { margin-left: auto; }
@@ -521,6 +511,7 @@ h1, h2, h3, p { margin-top: 0; }
   .editor-heading { flex-wrap: wrap; }
   .editor-heading strong { font-size: 12px; }
   .editor-heading .confidence-signal { width: 100%; margin: 0 0 0 42px; }
+  .brief-download { margin-left: 42px; }
   .editor-comparison { grid-template-columns: 1fr; gap: 6px; }
   .editor-point { padding: 11px; }
   .editor-point ul, .editor-point p, .editor-falsifier p { font-size: 12px; }
@@ -633,8 +624,6 @@ body { background-image: linear-gradient(180deg, rgba(12, 15, 14, .4), rgba(12, 
 .vela-chart-frame { margin-top: 12px; }
 .vela-chart { border-radius: 6px; }
 .history-warning { border-radius: 6px; color: #e3c992; }
-.backtest-risk-note { display: flex; align-items: flex-start; gap: 9px; margin: 14px 0; padding: 10px 12px; border: 1px solid rgba(220, 173, 93, 0.34); border-radius: 7px; background: rgba(72, 54, 24, 0.22); color: #dec99e; font-size: 12px; line-height: 1.55; }
-.backtest-risk-note svg { flex: 0 0 auto; margin-top: 1px; color: #d7ae62; }
 .history-details { margin-top: 9px; border-top: 1px solid var(--line-soft); }
 .history-details:last-of-type { border-bottom: 1px solid var(--line-soft); }
 .history-details > summary { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 58px; color: #dfe6e1; cursor: pointer; list-style: none; }
@@ -645,8 +634,7 @@ body { background-image: linear-gradient(180deg, rgba(12, 15, 14, .4), rgba(12, 
 .details-title strong { color: #dfe6e1; font-size: 14px; font-weight: 540; }
 .details-title > span { color: #9ba69e; font-size: 12px; }
 .details-body { padding: 0 0 13px; }
-.details-body > .crypto-context, .details-body > .backtest-panel, .details-body > .catalyst-replay { margin-top: 0; border-radius: 6px; box-shadow: none; }
-.details-body > .backtest-panel { background: #111613; }
+.details-body > .crypto-context, .details-body > .catalyst-replay { margin-top: 0; border-radius: 6px; box-shadow: none; }
 .details-body .history-warning { margin-bottom: 12px; }
 .history-source { color: #9ba69e; }
 .history-source a, .page-footer a { color: #c0e8cd; }

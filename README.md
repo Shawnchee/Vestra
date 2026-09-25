@@ -8,8 +8,9 @@ PreStocks are Solana tokens that PreStocks describes as tracking pre-IPO company
 
 - **Research:** select a supported PreStocks asset and review its catalogue description, issuer profile, live quote and reference mark, implied and mark valuations, circulating supply, and Solana mint alongside company-linked headlines.
 - **Bull vs. Bear:** Bull, Bear, and Neutral analysts read the same server-fetched evidence. A Council then checks the arguments against those headlines and summarizes the supported read, agreement, disagreement, unknowns, and what could change it. The debate streams into the UI as each role completes.
+- **Shareable research:** save a dated Markdown brief with the Council read, linked evidence, unknowns, and the PreStocks quote/mark snapshot.
 - **Council audio:** create an on-demand, two-voice WAV brief from the Council readout, then play or download it. Speech uses Gemini Flash-Lite TTS and the existing server-side Gemini key.
-- **Market replay:** inspect discovered Solana pool candles in LuxAlgo Vela, compare dated headlines with neighboring closes, and view a simple 5/20-day moving-average simulation with execution-cost assumptions.
+- **Market replay:** inspect discovered Solana pool candles in LuxAlgo Vela, step through dated closes, and compare company headlines with nearby pool activity. This is context, not a PreStocks price history or strategy test.
 - **Market context:** see pool liquidity and volume alongside a disclosed quote-to-mark check. CoinDesk crypto headlines are shown separately from company evidence.
 - **Watchlist checks:** saved assets stay in browser storage. While the app is open, it periodically checks up to five saved assets for quote movement and market-quality warnings.
 
@@ -19,15 +20,17 @@ PreStocks are Solana tokens that PreStocks describes as tracking pre-IPO company
 flowchart TB
   subgraph Browser["Vestra in the browser"]
     Research["Research desk<br/>Bull · Bear · Neutral · Council"]
-    Replay["Market replay<br/>Vela chart · catalyst view · backtest"]
+    Replay["Market replay<br/>Vela chart · headline timing"]
     Watchlist["Watchlist monitor<br/>browser-local saved assets"]
+    Brief["Cited research brief<br/>local Markdown download"]
     Audio["Council audio player<br/>play or download WAV"]
   end
 
-  subgraph Server["Next.js server routes"]
+  subgraph Server["Next.js server"]
+    Page["Research page<br/>loads PreStocks catalogue"]
     NewsAPI["/api/news<br/>company coverage"]
-    DebateAPI["/api/debate<br/>filter shared evidence · stream roles"]
-    HistoryAPI["/api/market-history<br/>pool discovery · candles"]
+    DebateAPI["/api/debate<br/>validate asset · filter evidence · stream roles"]
+    HistoryAPI["/api/market-history<br/>validate mint · discover pool · candles"]
     CryptoAPI["/api/crypto-news<br/>separate crypto context"]
     PodcastAPI["/api/podcast<br/>bounded two-speaker transcript"]
   end
@@ -41,11 +44,14 @@ flowchart TB
     GeminiTTS["Gemini Flash-Lite TTS<br/>two voices · WAV"]
   end
 
+  Page --> PreStocks
+  PreStocks -->|catalogue and quote/mark snapshot| Research
   Research --> NewsAPI
   Research --> DebateAPI
   Replay --> HistoryAPI
   Replay --> CryptoAPI
   Watchlist --> HistoryAPI
+  Research -->|user downloads cited snapshot| Brief
   NewsAPI --> GoogleNews
   DebateAPI --> PreStocks
   DebateAPI --> GoogleNews
@@ -63,10 +69,11 @@ flowchart TB
 
 ### Data boundaries
 
+- The dated brief is assembled and downloaded in the browser after the Council completes. It includes the Council read, confidence, evidence-linked claims, uncertainties/falsifiers, source URLs, and the PreStocks catalogue quote/mark snapshot. Vestra does not store or host the report.
 - PreStocks provides the supported asset catalogue: name, ticker, description, image, issuer profile URL, token mint, token price, mark price, implied valuation, mark valuation, and supply. Vestra surfaces those fields across the company card, quote snapshot, and market details. The per-asset endpoint does not include the product page’s aggregate holders, volume, and transaction counters. GeckoTerminal supplies discovered pool candles, liquidity, and volume; pool prices are not interchangeable with PreStocks catalogue prices.
 - Company headlines are fetched and filtered on the server. Bull, Bear, Neutral, and Council use that same bounded headline packet; headline metadata is not full article text. Broad crypto headlines remain outside the company debate evidence.
 - Debate claims are model-generated analysis, not verified facts or price forecasts. Source links are shown where the model provides valid evidence IDs. A model-specific quota or provider outage can still stop a run; Vestra retries a 429/quota or temporary provider failure once with the configured lower-tier model.
-- The backtest is a descriptive moving-average simulation over the discovered pool’s available candles. It does not model pool depth, price impact, taxes, or a PreStocks mark-price conversion. Missing pool days can affect the calendar span. Past results do not predict future results.
+- Solana pool prices and liquidity are separate market context; they are not PreStocks catalogue quotes or mark prices. Headline replay compares nearby closes and makes no causal claim.
 - The audio brief reads the existing Council result; it does not create a new conclusion. Gemini’s free tier may use prompts to improve Google products, so only public company and market research is sent. TTS availability and free quota depend on the Google AI Studio project.
 - Watchlist entries are stored in this browser. Checks run only while the app is open; this version has no Telegram or background push alerts.
 
@@ -86,21 +93,22 @@ Add `GEMINI_API_KEY` to `.env.local` to enable live debate and Council audio. Ke
 | --- | --- | --- |
 | `GEMINI_MODEL` | `gemini-3.5-flash-lite` | Default analyst model |
 | `GEMINI_FALLBACK_MODEL` | `gemini-3.1-flash-lite` | One retry after quota or temporary provider failures |
+| `GEMINI_FALLBACK_API_KEY` | — | Optional separate-project key used for one retry after quota/provider errors |
 | `GEMINI_BULL_MODEL` | `GEMINI_MODEL` | Optional Bull model override |
-| `GEMINI_BEAR_MODEL` | `gemini-3.7-flash` | Optional Bear model override |
+| `GEMINI_BEAR_MODEL` | `GEMINI_MODEL` | Optional Bear model override |
 | `GEMINI_NEUTRAL_MODEL` | `GEMINI_MODEL` | Optional Neutral model override |
-| `GEMINI_COUNCIL_MODEL` | `gemini-3.8-flash` | Council synthesis model |
+| `GEMINI_COUNCIL_MODEL` | `GEMINI_MODEL` | Council synthesis model |
 | `GEMINI_TTS_MODEL` | `gemini-3.8-flash-lite-tts` | On-demand speech model |
 | `NEWS_MAX_RECORDS` | `12` | Company headline results, capped at 20 |
 
-Vestra does not require a separate rate-limit database. The public debate and audio routes rely on Gemini's own project quotas and provider limits; monitor usage in Google AI Studio. The Gemini key stays on the server and is never exposed to the browser.
+Vestra does not require a separate rate-limit database. The public debate and audio routes rely on Gemini's project quotas and provider limits; monitor usage in Google AI Studio. `GEMINI_FALLBACK_API_KEY` works best when it belongs to a separate Gemini project, since keys in the same project share quota. Both keys stay server-side and are never exposed to the browser.
 
 ## Demo flow
 
 1. Open **Research**, select a PreStocks company, and scan its quote/mark snapshot and linked headlines.
-2. Run the debate. Show the Bull, Bear, and Neutral cases, then the Council synthesis and citations.
+2. Run the debate. Show the Bull, Bear, and Neutral cases, then the Council synthesis and citations. Save the dated brief to share the readout and its sources.
 3. Select **Create audio brief** in the Council card to play or download the two-voice summary.
-4. Open **Market replay** to inspect the selected asset’s discovered pool, compare a dated headline with nearby closes, and explain the moving-average simulation’s limits.
+4. Open **Market replay** to step through pool closes and compare a dated company headline with neighboring closes. Explain that timing does not prove cause and pool prices are not PreStocks returns.
 5. Save an asset and show the watchlist monitor while the app remains open.
 
 ## Build
